@@ -47,14 +47,13 @@ public class GameRoomController {
 
     @MessageMapping("/room/users")
     public void getUsers(@Payload RoomUsersRequest roomUsersRequest) {
-        int id = 1;
         List<UserDto> users = gameRoomService.getUsers();
         List<User> roomUsers = gameRoomService.getRoomUsers(roomUsersRequest.roomId());
 
         var updatedList = roomUsers.stream().map(u -> users.stream().filter(apiU -> Objects.equals(apiU.id(), u.getId())).findAny().orElse(null)).toList();
 
         messagingTemplate.convertAndSendToUser(
-                String.valueOf(id),"/queue/messages",
+                String.valueOf(roomUsersRequest.userId()),"/queue/messages",
                 updatedList);
     }
 }

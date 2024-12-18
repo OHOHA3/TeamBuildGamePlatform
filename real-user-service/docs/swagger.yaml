@@ -1,0 +1,272 @@
+definitions:
+  handlers.ErrorResponse:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  handlers.SuccessResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+    type: object
+  models.UserCreateRequest:
+    properties:
+      email:
+        maxLength: 256
+        type: string
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+      role:
+        enum:
+        - admin
+        - user
+        - hr
+        type: string
+      team:
+        maxLength: 100
+        type: string
+      username:
+        maxLength: 25
+        minLength: 3
+        type: string
+    required:
+    - email
+    - password
+    - role
+    - username
+    type: object
+  models.UserResponse:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+      team:
+        type: string
+      updated_at:
+        type: string
+      username:
+        type: string
+    type: object
+  models.UserUpdateRequest:
+    properties:
+      email:
+        maxLength: 256
+        type: string
+      password:
+        maxLength: 64
+        minLength: 8
+        type: string
+      role:
+        enum:
+        - admin
+        - user
+        - hr
+        type: string
+      team:
+        maxLength: 100
+        type: string
+      username:
+        maxLength: 25
+        minLength: 3
+        type: string
+    required:
+    - email
+    - role
+    - username
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Сервис Пользователей управляет информацией о пользователях системы.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: User Service API
+  version: "1.0"
+paths:
+  /user-service/api/v1/register:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя в системе
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Пользователь успешно создан
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "400":
+          description: Пользователь с таким email или username уже существует
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "422":
+          description: Некорректные данные запроса
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Регистрация нового пользователя
+      tags:
+      - user-service
+  /user-service/api/v1/users:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список всех пользователей в системе
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список пользователей
+          schema:
+            items:
+              $ref: '#/definitions/models.UserResponse'
+            type: array
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получение списка всех пользователей
+      tags:
+      - user-service
+  /user-service/api/v1/users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет пользователя по его ID
+      parameters:
+      - description: ID пользователя (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пользователь успешно удалён
+          schema:
+            $ref: '#/definitions/handlers.SuccessResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Удаление пользователя
+      tags:
+      - user-service
+    get:
+      consumes:
+      - application/json
+      description: Возвращает пользователя по его ID
+      parameters:
+      - description: ID пользователя (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Информация о пользователе
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получение пользователя по ID
+      tags:
+      - user-service
+    put:
+      consumes:
+      - application/json
+      description: Обновляет данные пользователя по его ID
+      parameters:
+      - description: ID пользователя (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Данные для обновления
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/models.UserUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пользователь успешно обновлен
+          schema:
+            $ref: '#/definitions/models.UserResponse'
+        "400":
+          description: Некорректные данные запроса
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Недостаточно прав для обновления пользователя
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Пользователь не найден
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "422":
+          description: Некорректные данные запроса
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Обновление пользователя
+      tags:
+      - user-service
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

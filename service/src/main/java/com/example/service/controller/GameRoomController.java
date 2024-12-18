@@ -1,8 +1,8 @@
 package com.example.service.controller;
 
 import com.example.service.dto.*;
+import com.example.service.model.User;
 import com.example.service.service.GameRoomService;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -11,6 +11,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/game-room-service/api/v1")
@@ -40,16 +41,20 @@ public class GameRoomController {
     }
 
     @MessageMapping("/game/status")
-    public void processMessage(@Payload GameStatusDto gameStatusDto) {
-        //todo
+    public void getGameStatus(@Payload GameStatusDto gameStatusDto) throws BadRequestException {
+        gameRoomService.getGameStatus(gameStatusDto);
     }
 
     @MessageMapping("/room/users")
-    public void processMessage( ) {
+    public void getUsers(@Payload RoomUsersRequest roomUsersRequest) {
         int id = 1;
+        List<UserDto> users = gameRoomService.getUsers();
+        List<User> roomUsers = gameRoomService.getRoomUsers(roomUsersRequest.roomId());
+
+        var updatedList = roomUsers.stream().map(u -> users.stream().filter(apiU -> Objects.equals(apiU.id(), u.getId())).findAny().orElse(null)).toList();
 
         messagingTemplate.convertAndSendToUser(
                 String.valueOf(id),"/queue/messages",
-                new GameDto(1L, "", "", ""));
+                updatedList);
     }
 }

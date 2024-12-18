@@ -1,0 +1,278 @@
+openapi: 3.0.0
+info:
+  title: TeamSoul API
+  description: API всей тимбилдинговой платформы.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Локальный сервер
+
+# ================================
+# В тэгах указываем сервис! Для структуризации
+# ================================
+tags:
+  - name: game-plugins-service
+    description: API для управления игровыми инстанциями и их списком.
+  - name: auth-service
+    description: API для аутентификации.
+  - name: another-service(example)
+    description: description
+
+paths:
+  # ================================
+  #       Сервис игровых плагинов
+  # ================================
+  /game-plugins-service/games:
+    get:
+      summary: Получить список игр
+      tags:
+        - game-plugins-service
+      operationId: getGamesList
+      responses:
+        '200':
+          description: Успешный ответ, содержащий список игр
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameOutput'
+
+  /game-plugins-service/games/create:
+    post:
+      summary: Создать игровой инстанс
+      tags:
+        - game-plugins-service
+      operationId: createGameInstance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInfo'
+      responses:
+        '200':
+          description: Успешно создан игровой инстанс
+          content:
+            text/plain:
+              examples:
+                example:
+                  value: containerId12345
+        '400':
+          description: Неверный запрос (ошибка клиента)
+          content:
+            text/plain:
+              examples:
+                incorrect game id:
+                  value: Game id 3 not found
+                websocket url is null:
+                  value: webSocketUrl is null
+
+  /game-plugins-service/games/stop/{containerId}:
+    get:
+      summary: Остановить игровой инстанс
+      tags:
+        - game-plugins-service
+      operationId: stopGameInstance
+      parameters:
+        - name: containerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешно остановлен игровой инстанс
+          content:
+            text/plain:
+              examples:
+                example:
+                  value: Success
+        '400':
+          description: Неверный запрос (контейнер не найден)
+          content:
+            text/plain:
+              examples:
+                example:
+                  value: Container not found
+  
+# ================================
+#       Аутентификация
+# ================================
+  /auth-service/auth/login:
+    post:
+      summary: Аутентификация пользователя
+      description: Позволяет аутентифицировать пользователя и получить JWT токен.
+      tags:
+        - auth-service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '401':
+          description: Неверный логин или пароль
+
+  /auth-service/auth/validate:
+    get:
+      summary: Проверка токена
+      description: Проверяет токен на валидность и возвращает информацию о пользователе.
+      tags:
+        - auth-service
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: Bearer eyJhbGciOiJIUzI1NiIsInR5...
+      responses:
+        '200':
+          description: Токен валиден, возвращается информация о пользователе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailsResponse'
+        '401':
+          description: Токен недействителен или истёк
+
+  # ================================
+  # Это пример эндпоинта на новый сервис.
+  # Обязательно указываем тэг сервиса.
+  # ================================
+  /example/{id}:
+    get:
+      summary: Example
+      tags:
+        - another-service(example)
+      operationId: getGameDetails
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: description
+          content:
+            text/plain:
+              examples:
+                example:
+                  value: Success
+        '404':
+          description: description
+          content:
+            text/plain:
+              examples:
+                example:
+                  value: Bad request
+
+# ================================
+# В компонентах пишем сущности для запроса/ответа
+# ================================
+components:
+  schemas:
+    GameOutput:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Chess
+        version:
+          type: string
+          example: 1.0.0
+        description:
+          type: string
+          example: A classic chess game plugin
+      required:
+        - id
+        - name
+        - version
+        - description
+
+    CreateInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        webSocketUrl:
+          type: string
+          example: ws://example.com/socket
+      required:
+        - id
+        - webSocketUrl
+    # ================================
+    # Схемы аутентификации
+    # ================================
+    LoginRequest:
+      type: object
+      properties:
+        login:
+          type: string
+          description: Логин или email пользователя
+          example: user@example.com
+        password:
+          type: string
+          description: Пароль пользователя
+          example: password123
+      required:
+        - login
+        - password
+
+    AuthenticationResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT токен для доступа
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      required:
+        - accessToken
+
+    UserDetailsResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Идентификатор пользователя
+          example: 1
+        login:
+          type: string
+          description: Логин пользователя
+          example: dungeonmaster
+        role:
+          $ref: '#/components/schemas/UserRole'
+      required:
+        - id
+        - login
+        - role
+        
+    UserRole:
+      type: string
+      description: Возможные роли пользователя в системе
+      enum:
+        - user
+        - admin
+        - hr
+      example: user
+      
+    UserStatus:
+      type: string
+      description: Возможные статусы пользователя
+      enum:
+        - active
+        - blocked
+      example: active

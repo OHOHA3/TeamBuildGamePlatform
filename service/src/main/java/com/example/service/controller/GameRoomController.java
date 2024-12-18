@@ -53,7 +53,7 @@ public class GameRoomController {
         var updatedList = roomUsers.stream().map(u -> users.stream().filter(apiU -> Objects.equals(apiU.id(), u.getId())).findAny().orElse(null)).toList();
 
         messagingTemplate.convertAndSendToUser(
-                String.valueOf(roomUsersRequest.userId()),"/queue/messages",
+                String.valueOf(roomUsersRequest.gameId()),"/queue/messages",
                 updatedList);
     }
 }

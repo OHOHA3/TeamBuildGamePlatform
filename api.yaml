@@ -1,0 +1,747 @@
+openapi: 3.0.0
+info:
+  title: TeamSoul API
+  description: API всей тимбилдинговой платформы.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Локальный сервер
+
+# ================================
+# В тэгах указываем сервис! Для структуризации
+# ================================
+tags:
+  - name: game-plugins-service
+    description: API для управления игровыми инстанциями и их списком.
+  - name: auth-service
+    description: API для аутентификации.
+  - name: user-service
+    description: API для управления пользователями.
+  - name: another-service(example)
+    description: description
+
+paths:
+  # ================================
+  #       Сервис игровых плагинов
+  # ================================
+  /game-plugins-service/games:
+    get:
+      summary: Получить список игр
+      tags:
+        - game-plugins-service
+      operationId: getGamesList
+      responses:
+        '200':
+          description: Успешный ответ, содержащий список игр
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameOutput'
+
+  /game-plugins-service/games/create:
+    post:
+      summary: Создать игровой инстанс
+      tags:
+        - game-plugins-service
+      operationId: createGameInstance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInfo'
+      responses:
+        '200':
+          description: Успешно создан игровой инстанс
+          content:
+            text/plain:
+              examples:
+                example:
+                  value: containerId12345
+        '400':
+          description: Неверный запрос (ошибка клиента)
+          content:
+            text/plain:
+              examples:
+                incorrect game id:
+                  value: Game id 3 not found
+                websocket url is null:
+                  value: webSocketUrl is null
+
+  /game-plugins-service/games/stop/{containerId}:
+    get:
+      summary: Остановить игровой инстанс
+      tags:
+        - game-plugins-service
+      operationId: stopGameInstance
+      parameters:
+        - name: containerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешно остановлен игровой инстанс
+          content:
+            text/plain:
+              examples:
+                example:
+                  value: Success
+        '400':
+          description: Неверный запрос (контейнер не найден)
+          content:
+            text/plain:
+              examples:
+                example:
+                  value: Container not found
+  
+# ================================
+#       Аутентификация
+# ================================
+  /auth-service/api/v1/login:
+    post:
+      summary: Аутентификация пользователя
+      description: Позволяет аутентифицировать пользователя и получить JWT токен.
+      tags:
+        - auth-service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешная аутентификация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '401':
+          description: Неверный логин/почта или пароль
+
+  /auth-service/api/v1/validate:
+    get:
+      summary: Проверка токена
+      description: Проверяет токен на валидность и возвращает информацию о пользователе.
+      tags:
+        - auth-service
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: Bearer eyJhbGciOiJIUzI1NiIsInR5...
+      responses:
+        '200':
+          description: Токен валиден, возвращается информация о пользователе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailsResponse'
+        '401':
+          description: Токен недействителен или истёк
+
+# ================================
+#       Сервис пользователей
+# ================================
+  /user-service/api/v1/register:
+    post:
+      summary: Регистрация нового пользователя
+      description: Создает нового пользователя в системе.
+      tags:
+        - user-service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreateRequest'
+      responses:
+        '201':
+          description: Пользователь успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Пользователь с таким email или username уже существует
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user-service/api/v1/users:
+    get:
+      summary: Получить список всех пользователей
+      description: Возвращает список всех пользователей в системе.
+      tags:
+        - user-service
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Успешный ответ, содержащий список пользователей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user-service/api/v1/users/{id}:
+    get:
+      summary: Получить пользователя по ID
+      description: Возвращает информацию о пользователе по его ID.
+      tags:
+        - user-service
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "548ef49e-119a-40b2-a0ac-f5dcfabf3d88"
+      responses:
+        '200':
+          description: Информация о пользователе
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Обновить пользователя
+      description: Обновляет информацию о пользователе по его ID.
+      tags:
+        - user-service
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "548ef49e-119a-40b2-a0ac-f5dcfabf3d88"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        '200':
+          description: Пользователь успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Некорректные данные запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Недостаточно прав для обновления пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Удалить пользователя
+      description: Удаляет пользователя по его ID.
+      tags:
+        - user-service
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: "548ef49e-119a-40b2-a0ac-f5dcfabf3d88"
+      responses:
+        '200':
+          description: Пользователь успешно удален
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ================================
+  #       Сервис игровых комнат
+  # ================================
+  /game-room-service/api/v1/user/connect:
+    post:
+      summary: Юзер зашел в комнату
+      description: Юзер зашел в комнату
+      tags:
+        - game-room-service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserConnectRequest'
+      responses:
+        '200':
+          description: Юзер успешно зашел в комнату
+        '400':
+          description: Юзер не найден
+
+  /game-room-service/api/v1/user/disconnect:
+    post:
+      summary: Юзер покинул комнату
+      description: Юзер покинул комнату
+      tags:
+        - game-room-service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDisconnectRequest'
+      responses:
+        '200':
+          description: Юзер успешно покинул комнату
+        '400':
+          description: Юзер не найден
+
+  /game-room-service/api/v1/game/get-all:
+    get:
+      summary: Получить игры
+      description: Получить все доступные игры
+      tags:
+        - game-room-service
+      responses:
+        '200':
+          description: Список всех доступных игр
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GameDto'
+
+  /game-room-service/api/v1/game/create:
+    get:
+      summary: Создать игру
+      description: Создать игру
+      tags:
+        - game-room-service
+      responses:
+        '200':
+          description: Список всех доступных игр
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateGamesDto'
+
+  # ================================
+  # Это пример эндпоинта на новый сервис.
+  # Обязательно указываем тэг сервиса.
+  # ================================
+  /example/{id}:
+    get:
+      summary: Example
+      tags:
+        - another-service(example)
+      operationId: getGameDetails
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: description
+          content:
+            text/plain:
+              examples:
+                example:
+                  value: Success
+        '404':
+          description: description
+          content:
+            text/plain:
+              examples:
+                example:
+                  value: Bad request
+
+# ================================
+# В компонентах пишем сущности для запроса/ответа
+# ================================
+components:
+  schemas:
+    GameOutput:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Chess
+        version:
+          type: string
+          example: 1.0.0
+        description:
+          type: string
+          example: A classic chess game plugin
+      required:
+        - id
+        - name
+        - version
+        - description
+
+    CreateInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        webSocketUrl:
+          type: string
+          example: ws://example.com/socket
+      required:
+        - id
+        - webSocketUrl
+    # ================================
+    # Схемы сервиса игровых комнат
+    # ================================
+    UserConnectRequest:
+      type: object
+      properties:
+        roomId:
+          type: integer
+          example: 1
+        userId:
+          type: integer
+          example: 1
+      required:
+        - roomId
+        - userId
+
+    UserDisconnectRequest:
+      type: object
+      properties:
+        userId:
+          type: integer
+          example: 1
+      required:
+        - userId
+
+    GameDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Chess
+        version:
+          type: string
+          example: 1.0.0
+        description:
+          type: string
+          example: A classic chess game plugin
+      required:
+        - id
+        - name
+        - version
+        - description
+
+    CreateGamesDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        webSocketUrl:
+          type: string
+          example: http://example.com
+      required:
+        - userId
+        - webSocketUrl
+    # ================================
+    # Схемы аутентификации
+    # ================================
+    LoginRequest:
+      type: object
+      properties:
+        identifier:
+          type: string
+          description: Логин или email пользователя
+          example: user@example.com
+        password:
+          type: string
+          description: Пароль пользователя
+          example: password123
+      required:
+        - login
+        - password
+
+    AuthenticationResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: JWT токен для доступа
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      required:
+        - accessToken
+
+    UserDetailsResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Идентификатор пользователя
+          example: 1
+        login:
+          type: string
+          description: Логин пользователя
+          example: dungeonmaster
+        role:
+          $ref: '#/components/schemas/UserRole'
+      required:
+        - id
+        - login
+        - role
+        
+    UserRole:
+      type: string
+      description: Возможные роли пользователя в системе
+      enum:
+        - user
+        - admin
+        - hr
+      example: user
+      
+    UserStatus:
+      type: string
+      description: Возможные статусы пользователя
+      enum:
+        - active
+        - blocked
+      example: active
+
+    # ================================
+    # Схемы сервиса пользователей
+    # ================================
+    UserCreateRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: john_doe
+          minLength: 3
+          maxLength: 25
+        email:
+          type: string
+          format: email
+          example: john@example.com
+          maxLength: 256
+        password:
+          type: string
+          example: password123
+          minLength: 8
+          maxLength: 64
+        team:
+          type: string
+          example: Team Alpha
+          maxLength: 100
+        role:
+          type: string
+          description: Роль пользователя
+          enum:
+            - user
+            - admin
+            - hr
+          example: user
+      required:
+        - username
+        - email
+        - password
+        - role
+
+    UserUpdateRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: john_doe_updated
+          minLength: 3
+          maxLength: 25
+        email:
+          type: string
+          format: email
+          example: john_updated@example.com
+          maxLength: 256
+        password:
+          type: string
+          description: Пароль пользователя (опционально)
+          example: newpassword123
+          minLength: 8
+          maxLength: 64
+        team:
+          type: string
+          example: Team Beta
+          maxLength: 100
+        role:
+          type: string
+          description: Роль пользователя
+          enum:
+            - user
+            - admin
+            - hr
+          example: admin
+      required:
+        - username
+        - email
+        - role
+
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "548ef49e-119a-40b2-a0ac-f5dcfabf3d88"
+        username:
+          type: string
+          example: john_doe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        team:
+          type: string
+          example: Team Alpha
+        role:
+          type: string
+          description: Роль пользователя
+          enum:
+            - user
+            - admin
+            - hr
+          example: user
+        created_at:
+          type: string
+          format: date-time
+          example: "2024-12-10T03:59:28.442+0700"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2024-12-10T04:00:00.000+0700"
+      required:
+        - id
+        - username
+        - email
+        - role
+        - created_at
+        - updated_at
+      example:
+        id: "548ef49e-119a-40b2-a0ac-f5dcfabf3d88"
+        username: "john_doe"
+        email: "john@example.com"
+        team: "Team Alpha"
+        role: "user"
+        created_at: "2024-12-10T03:59:28.442+0700"
+        updated_at: "2024-12-10T04:00:00.000+0700"
+
+    SuccessResponse:
+      type: object
+      properties:
+        msg:
+          type: string
+          example: Пользователь успешно удален
+      required:
+        - msg
+      example:
+        msg: "Пользователь успешно удален"
+
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: Некорректные данные запроса
+      required:
+        - code
+        - message
+      example:
+        code: 400
+        message: "Некорректные данные запроса"

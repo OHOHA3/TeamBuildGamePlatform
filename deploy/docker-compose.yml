@@ -1,0 +1,19 @@
+version: 'v3'
+networks:
+  app:
+    driver: bridge
+
+services:
+  nginx:
+    image: nginx:1.21
+    container_name: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "8080:8080"
+    networks:
+      - app
+    depends_on:
+      - game-plugins-service
+      - auth-service
+      - game-room-service

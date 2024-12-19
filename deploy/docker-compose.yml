@@ -27,6 +27,13 @@ services:
   game-plugins-service:
     build: ../game-plugins-service
     container_name: game-plugins-service
+    enviroment:
+      GAMEDB_URL: ${GAMEDB_URL}
+      GAMESDB_USER: ${GAMESDB_PASSWORD}
+      GAMESDB_PASSWORD: ${GAMESDB_PASSWORD}
+      DOCKER_HOST_URL: ${DOCKER_HOST_URL}
+      DOCKER_USERNAME: ${DOCKER_USERNAME}
+      DOCKER_PASSWORD: ${DOCKER_PASSWORD}
     networks:
       - app
 

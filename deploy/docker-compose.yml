@@ -30,26 +30,11 @@ services:
     networks:
       - app
 
-  db-user-service:
-    container_name: db-user-service
-    image: postgres:17.2-alpine3.20
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      PGDATA: "/var/lib/postgresql/data/pgdata"
-    volumes:
-      - ./postgresql-config/init-scripts:/docker-entrypoint-initdb.d
-      - postgres-data:/var/lib/postgresql/data
-    restart: unless-stopped
-    networks:
-      - app
-
   user-service:
     build: ../real-user-service
     container_name: user-service
     environment:
-      DB_HOST: db-user-service
+      DB_HOST: ${DB_HOST}
       DB_PORT: ${DB_PORT}
       DB_USER: ${POSTGRES_USER}
       DB_PASSWORD: ${POSTGRES_PASSWORD}

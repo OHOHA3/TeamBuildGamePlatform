@@ -27,7 +27,7 @@ services:
   game-plugins-service:
     build: ../game-plugins-service
     container_name: game-plugins-service
-    enviroment:
+    environment:
       GAMEDB_URL: ${GAMEDB_URL}
       GAMESDB_USER: ${GAMESDB_PASSWORD}
       GAMESDB_PASSWORD: ${GAMESDB_PASSWORD}

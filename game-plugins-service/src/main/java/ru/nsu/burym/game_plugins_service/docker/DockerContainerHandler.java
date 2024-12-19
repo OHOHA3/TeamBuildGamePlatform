@@ -4,6 +4,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.exception.NotModifiedException;
+import com.github.dockerjava.api.model.AuthConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,17 +17,21 @@ public class DockerContainerHandler {
 
     private final DockerClient dockerClient;
 
+    private final AuthConfig authConfig;
+
     @Autowired
-    public DockerContainerHandler(DockerClient dockerClient) {
+    public DockerContainerHandler(DockerClient dockerClient, AuthConfig authConfig) {
         this.dockerClient = dockerClient;
+        this.authConfig = authConfig;
     }
 
     public String createContainer(String imageName, String webSocketUrl) {
         try {
             System.out.println("Pulling image: " + imageName);
             dockerClient.pullImageCmd(imageName)
+                    .withAuthConfig(authConfig)
                     .exec(new PullImageResultCallback())
-                    .awaitCompletion(30, TimeUnit.SECONDS);
+                    .awaitCompletion(60, TimeUnit.SECONDS);
 
             System.out.println("Creating and starting container...");
             CreateContainerResponse container = dockerClient.createContainerCmd(imageName)

@@ -4,6 +4,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.okhttp.OkDockerHttpClient;
+import com.github.dockerjava.api.model.AuthConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,5 +38,12 @@ public class BeanConfig {
         return DockerClientBuilder.getInstance(config)
                 .withDockerHttpClient(httpClient)
                 .build();
+    }
+
+    @Bean
+    public AuthConfig authConfig() {
+        return new AuthConfig()
+                .withUsername(environment.getProperty("dockerUsername"))
+                .withUsername(environment.getProperty("dockerPassword"));
     }
 }

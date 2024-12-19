@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +28,15 @@ public class GameRoomService {
     private final GameRepo gameRepo;
     private final RestTemplate restTemplate = new RestTemplate();
 
+    @Value("${app.game-plugin-service.host}")
+    private String gamePluginServiceUrl;
+
+    @Value("${app.user-service.host}")
+    private String userServiceUrl;
+
     public List<GameDto> getAllAvailableGames() {
         ResponseEntity<List<GameDto>> response = restTemplate
-                .exchange("http://localhost/game-plugin/game-plugins-service/games", HttpMethod.GET, null,  new ParameterizedTypeReference<List<GameDto>>() {
+                .exchange("http://" + gamePluginServiceUrl + ":8080/game-plugin/game-plugins-service/games", HttpMethod.GET, null,  new ParameterizedTypeReference<List<GameDto>>() {
                 });
         return response.getBody();
     }
@@ -38,7 +45,7 @@ public class GameRoomService {
         var createdRoom = gameRoomRepo.save(new GameRoom());
 
         ResponseEntity<CreateGamesDto> response = restTemplate
-                .postForEntity("http://localhost/game-plugin/game-plugins-service/games", new CreateGamesDto(createdRoom.getId(), "ws://localhost:8080/ws"),  CreateGamesDto.class);
+                .postForEntity("http://" + gamePluginServiceUrl + ":8080/game-plugin/game-plugins-service/games", new CreateGamesDto(createdRoom.getId(), "ws://localhost:8080/ws"),  CreateGamesDto.class);
         return response.getBody();
     }
 
@@ -56,7 +63,7 @@ public class GameRoomService {
 
     public List<UserDto> getUsers() {
         ResponseEntity<List<UserDto>> response = restTemplate
-                .exchange("http://localhost/user-service/api/v1/users", HttpMethod.GET, null,  new ParameterizedTypeReference<List<UserDto>>() {
+                .exchange("http://" + gamePluginServiceUrl + ":8080/user-service/api/v1/users", HttpMethod.GET, null,  new ParameterizedTypeReference<List<UserDto>>() {
                 });
         return response.getBody();
     }

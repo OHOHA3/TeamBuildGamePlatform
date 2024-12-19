@@ -12,6 +12,15 @@ services:
   auth-service:
     build: ../backend/auth-service
     container_name: auth-service
+    environment:
+      DEFAULT_ADMIN_LOGIN: ${DEFAULT_ADMIN_LOGIN}
+      DEFAULT_ADMIN_EMAIL: ${DEFAULT_ADMIN_EMAIL}
+      DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD}
+      DB_HOST: db-user-service
+      DB_PORT: ${DB_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     networks:
       - app
 
@@ -30,7 +39,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
-      # - ./init-scripts:/docker-entrypoint-initdb.d
+      - ./postgresql-config/init-scripts:/docker-entrypoint-initdb.d
       - postgres-data:/var/lib/postgresql/data
     restart: unless-stopped
     networks:

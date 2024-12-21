@@ -3,8 +3,8 @@ const express = require("express");
 const http = require("http");
 const cors = require("cors");
 const serverSocketIO = require("socket.io");
-const Stomp = require("stompjs");
-const SockJS = require("sockjs-client");
+const fetch = require("node-fetch");
+
 
 const app = express();
 const server = http.createServer(app);
@@ -15,8 +15,7 @@ const gameSocket = serverSocketIO(server, {
   },
 });
 const port = 5000;
-//const sockJS = new SockJS(process.env.WEBSOCKET_URL);
-//stompClient = Stomp.over(sockJS);
+
 
 var fs = require('fs');
 var questions = fs.readFileSync('questions.txt').toString().split("\n");
@@ -40,36 +39,34 @@ function getRandomPlayer() {
 }
 
 
-// function sendGameState() {
-//   var state = {
-//     status: gameState.status,
-//   };
-//   stompClient.send("/app/game/status", {}, JSON.stringify(state));
-// }
-// function onRoomSrvMessageReceived(room) {
-//   console.log(room);
-//   gameState.players = room.map((value) => value.username);
-// }
-// function onRoomSrvConnected() {
-//   console.log("Connected to room service");
-//   stompClient.subscribe(
-//     `/game/${roomNumber}/queue/messages`,
-//     onRoomSrvMessageReceived
-//   );
-//   sendGameState();
-//   var roomRequest = {
-//     gameId: roomNumber,
-//     roomId: roomNumber,
-//   };
-//   stompClient.send("/app/room/users", {}, JSON.stringify(roomRequest));
-// }
-// function onRoomSrvError(err) {
-//   console,log(err);
-// }
-// function onRoomSrvDisconnect() {
-//   console.log("Disconnected from room service");
-// }
-// stompClient.connect({}, onRoomSrvConnected, onRoomSrvError, onRoomSrvDisconnect);
+const roomSrvUrl = process.env.WEBSOCKET_URL ? process.env.WEBSOCKET_URL : "http://localhost:3000";
+fetch(`${roomSrvUrl}/game-room-service/api/v1/room/users`,
+  {
+      method: 'POST',
+      body: JSON.stringify({
+        gameId: roomNumber,
+        roomId: roomNumber,
+      }),
+      headers: {
+          'Content-type':
+              'application/json; charset=UTF-8',
+      },
+  })
+  // Parse JSON data
+  .then((response) => response.json())
+  // Showing response
+  .then((json) => {
+    console.log(json)
+    if (json && Array.isArray(json)) {
+      gameState.players = json.map((value) => value.username);
+    } else {
+      console.log("Room srv response bad format");
+    }
+  })
+  .catch(err => {
+    console.log("Room srv is unreachable");
+    console.log(err);
+  });
 
 
 gameSocket.on("connection", (socket) => {
@@ -82,7 +79,6 @@ gameSocket.on("connection", (socket) => {
       gameState.status = "started"
       gameState.activePlayer = getRandomPlayer();
       gameState.question = getQuestion();
-      //sendGameState();
     }
     var response = {
       id: socket.id,
@@ -105,7 +101,6 @@ gameSocket.on("connection", (socket) => {
     gameState.idArray = gameState.idArray.filter(e => e !== socket.id)
     if (gameState.idArray.length < 2) {
       gameState.status = "ended"
-      //sendGameState();
     }
     if (gameState.activePlayer == socket.id) {
       gameState.activePlayer = getRandomPlayer();

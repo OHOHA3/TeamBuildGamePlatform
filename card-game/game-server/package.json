@@ -14,8 +14,7 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "http": "^0.0.1-security",
-    "socket.io": "^4.8.1",
-    "sockjs-client": "^1.6.1",
-    "stompjs": "^2.3.3"
+    "node-fetch": "^2.6.1",
+    "socket.io": "^4.8.1"
   }
 }

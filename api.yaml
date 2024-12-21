@@ -17,14 +17,14 @@ tags:
     description: API для аутентификации.
   - name: user-service
     description: API для управления пользователями.
-  - name: another-service(example)
-    description: description
+  - name: game-room-service
+    description: API для взаимодействия с игровыми комнатами.
 
 paths:
   # ================================
   #       Сервис игровых плагинов
   # ================================
-  /game-plugins-service/games:
+  /game-plugins-service/api/v1/games:
     get:
       summary: Получить список игр
       tags:
@@ -38,9 +38,9 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/GameOutput'
+                  $ref: '#/components/schemas/GamesResponse'
 
-  /game-plugins-service/games/create:
+  /game-plugins-service/api/v1/games/create:
     post:
       summary: Создать игровой инстанс
       tags:
@@ -51,7 +51,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateInfo'
+              $ref: '#/components/schemas/CreateGameRequest'
       responses:
         '200':
           description: Успешно создан игровой инстанс
@@ -70,7 +70,7 @@ paths:
                 websocket url is null:
                   value: webSocketUrl is null
 
-  /game-plugins-service/games/stop/{containerId}:
+  /game-plugins-service/api/v1/games/stop/{containerId}:
     get:
       summary: Остановить игровой инстанс
       tags:
@@ -421,8 +421,8 @@ paths:
 
   /game-room-service/api/v1/game/status:
     post:
-      summary: Получить статус игры
-      description: Получить статус игры
+      summary: Обновить статус игры
+      description: Обновить статус игры
       tags:
         - game-room-service
       requestBody:
@@ -459,44 +459,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/UserDto'
 
-  # ================================
-  # Это пример эндпоинта на новый сервис.
-  # Обязательно указываем тэг сервиса.
-  # ================================
-  /example/{id}:
-    get:
-      summary: Example
-      tags:
-        - another-service(example)
-      operationId: getGameDetails
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: integer
-      responses:
-        '200':
-          description: description
-          content:
-            text/plain:
-              examples:
-                example:
-                  value: Success
-        '404':
-          description: description
-          content:
-            text/plain:
-              examples:
-                example:
-                  value: Bad request
 
 # ================================
 # В компонентах пишем сущности для запроса/ответа
 # ================================
 components:
   schemas:
-    GameOutput:
+    GamesResponse:
       type: object
       properties:
         id:
@@ -517,7 +486,7 @@ components:
         - version
         - description
 
-    CreateInfo:
+    CreateGameRequest:
       type: object
       properties:
         id:

@@ -11,7 +11,7 @@ import ru.nsu.burym.game_plugins_service.service.GameInfoService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/games")
+@RequestMapping("/game-plugins-service/api/v1/games")
 public class GameController {
 
     private final GameInfoService gameInfoService;

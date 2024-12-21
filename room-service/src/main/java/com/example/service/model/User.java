@@ -12,7 +12,7 @@ import java.io.Serializable;
 @RedisHash(value = "User")
 public class User implements Serializable {
     @Id
-    private Long id;
+    private String id;
     private String name;
     private Long gameRoomId;
 

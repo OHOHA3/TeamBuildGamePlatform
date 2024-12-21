@@ -72,7 +72,7 @@ services:
       - app
 
   game-room-service:
-    build: ../service
+    build: ../room-service
     container_name: game-room-service
     networks:
       - app

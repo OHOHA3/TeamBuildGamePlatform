@@ -15,13 +15,13 @@ RUN mkdir frontend
 COPY ./game-client/package.json ./frontend/
 RUN npm --prefix ./frontend install
 RUN npm install -g serve
-RUN npm --prefix ./frontend run build
 COPY ./game-client/. ./frontend/
+RUN npm --prefix ./frontend run build
 
 EXPOSE 3000
+EXPOSE 5000 
 
-# Starting backend
-RUN node /backend/server.js &
+COPY ./runner.sh .
+RUN chmod +x runner.sh
 
-# Starting frontend
-CMD serve -s ./frontend/build
+CMD ./runner.sh

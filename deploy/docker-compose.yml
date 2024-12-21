@@ -49,9 +49,7 @@ services:
       DB_SSLMODE: disable
       DB_TIMEZONE: UTC
       PORT: 8080
-      JWT_SECRET: your_jwt_secret_key
-    ports:
-      - "8080:8080"
+      JWT_SECRET: ${JWT_SECRET}
     networks:
       - app
 
@@ -72,7 +70,7 @@ services:
       - app
 
   game-room-service:
-    build: ../service
+    build: ../room-service
     container_name: game-room-service
     networks:
       - app

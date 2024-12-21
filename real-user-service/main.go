@@ -1,13 +1,10 @@
 package main
 
 import (
-	"go.uber.org/zap"
-	"log"
-	"os"
-	"real-user-service/models"
-
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"go.uber.org/zap"
+	"os"
 
 	"real-user-service/config"
 	"real-user-service/handlers"
@@ -39,30 +36,21 @@ import (
 // @name Authorization
 func main() {
 	config.InitLogger()
-	defer func() {
-		err := config.Logger.Sync()
-		if err != nil {
-			log.Fatalf("Не удалось синхронизировать логгер: %v", err)
-		}
-	}()
+	defer config.Logger.Sync()
 
 	config.LoadConfig()
 
 	db := config.GetDB()
 
-	err := db.AutoMigrate(&models.User{})
-	if err != nil {
-		config.Logger.Fatal("Не удалось выполнить автомиграцию", zap.Error(err))
-	}
-
 	validate := validator.New()
+	config.InitValidator(validate)
 
 	h := handlers.NewHandler(db, validate)
 
 	router := gin.Default()
 
-	router.Use(gin.Recovery())
-	router.Use(gin.LoggerWithWriter(zap.NewStdLog(config.Logger).Writer()))
+	//router.Use(gin.Recovery())
+	//router.Use(gin.LoggerWithWriter(zap.NewStdLog(config.Logger).Writer()))
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 

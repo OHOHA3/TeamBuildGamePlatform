@@ -56,7 +56,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "Пользователь с таким email или username уже существует",
+                        "description": "Пользователь с таким login или email уже существует",
                         "schema": {
                             "$ref": "#/definitions/handlers.ErrorResponse"
                         }
@@ -133,8 +133,8 @@ const docTemplate = `{
                 "summary": "Получение пользователя по ID",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "ID пользователя (UUID)",
+                        "type": "integer",
+                        "description": "ID пользователя (integer)",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -180,8 +180,8 @@ const docTemplate = `{
                 "summary": "Обновление пользователя",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "ID пользователя (UUID)",
+                        "type": "integer",
+                        "description": "ID пользователя (integer)",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -254,8 +254,8 @@ const docTemplate = `{
                 "summary": "Удаление пользователя",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "ID пользователя (UUID)",
+                        "type": "integer",
+                        "description": "ID пользователя (integer)",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -309,14 +309,19 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "email",
+                "login",
                 "password",
-                "role",
-                "username"
+                "role"
             ],
             "properties": {
                 "email": {
                     "type": "string",
-                    "maxLength": 256
+                    "maxLength": 255
+                },
+                "login": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 3
                 },
                 "password": {
                     "type": "string",
@@ -330,15 +335,6 @@ const docTemplate = `{
                         "user",
                         "hr"
                     ]
-                },
-                "team": {
-                    "type": "string",
-                    "maxLength": 100
-                },
-                "username": {
-                    "type": "string",
-                    "maxLength": 25,
-                    "minLength": 3
                 }
             }
         },
@@ -352,18 +348,18 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "type": "integer"
+                },
+                "login": {
                     "type": "string"
                 },
                 "role": {
                     "type": "string"
                 },
-                "team": {
+                "status": {
                     "type": "string"
                 },
                 "updated_at": {
-                    "type": "string"
-                },
-                "username": {
                     "type": "string"
                 }
             }
@@ -372,13 +368,19 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "email",
+                "login",
                 "role",
-                "username"
+                "status"
             ],
             "properties": {
                 "email": {
                     "type": "string",
-                    "maxLength": 256
+                    "maxLength": 255
+                },
+                "login": {
+                    "type": "string",
+                    "maxLength": 20,
+                    "minLength": 3
                 },
                 "password": {
                     "type": "string",
@@ -393,14 +395,12 @@ const docTemplate = `{
                         "hr"
                     ]
                 },
-                "team": {
+                "status": {
                     "type": "string",
-                    "maxLength": 100
-                },
-                "username": {
-                    "type": "string",
-                    "maxLength": 25,
-                    "minLength": 3
+                    "enum": [
+                        "active",
+                        "blocked"
+                    ]
                 }
             }
         }

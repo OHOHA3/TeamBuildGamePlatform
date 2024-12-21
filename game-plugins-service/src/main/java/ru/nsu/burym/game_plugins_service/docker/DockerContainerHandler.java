@@ -36,6 +36,8 @@ public class DockerContainerHandler {
             System.out.println("Creating and starting container...");
             CreateContainerResponse container = dockerClient.createContainerCmd(imageName)
                     //.withHostConfig(HostConfig.newHostConfig())
+                    // hostPort:containerPort
+                    .withPortSpecs("5000:5000", "3000:3000") //todo переделать на случайный порт хоста
                     .withEnv("WEBSOCKET_URL", webSocketUrl)
                     .exec();
 

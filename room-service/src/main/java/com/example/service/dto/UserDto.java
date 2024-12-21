@@ -8,7 +8,7 @@ public record UserDto(
         String email,
         String team,
         String role,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime created_at,
+        LocalDateTime updated_at
 ) {
 }

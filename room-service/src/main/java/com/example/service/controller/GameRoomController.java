@@ -3,6 +3,7 @@ package com.example.service.controller;
 import com.example.service.dto.*;
 import com.example.service.model.User;
 import com.example.service.service.GameRoomService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -26,18 +27,21 @@ public class GameRoomController {
     }
 
     @GetMapping("/game/create")
-    public CreateGamesDto createGame() {
-        return gameRoomService.createGame();
+    public CreatedRoomDto createGame(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        return gameRoomService.createGame(token);
     }
 
     @PostMapping("/user/connect")
-    public void userConnect(@RequestBody UserConnectRequest userConnectRequest) throws BadRequestException {
-        gameRoomService.userConnect(userConnectRequest);
+    public void userConnect(@RequestBody UserConnectRequest userConnectRequest, HttpServletRequest request) throws BadRequestException {
+        String token = request.getHeader("Authorization");
+        gameRoomService.userConnect(token, userConnectRequest);
     }
 
     @PostMapping("/user/disconnect")
-    public void userDisconnect(@RequestBody UserDisconnectRequest userConnectRequest) throws BadRequestException {
-        gameRoomService.userDisconnect(userConnectRequest);
+    public void userDisconnect(HttpServletRequest request) throws BadRequestException {
+        String token = request.getHeader("Authorization");
+        gameRoomService.userDisconnect(token);
     }
 
     @MessageMapping("/game/status")

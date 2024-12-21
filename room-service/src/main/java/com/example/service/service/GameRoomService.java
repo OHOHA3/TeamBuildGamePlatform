@@ -31,6 +31,9 @@ public class GameRoomService {
     @Value("${app.game-plugin-service.host}")
     private String gamePluginServiceUrl;
 
+    @Value("${app.auth-service.host}")
+    private String authServiceUrl;
+
     @Value("${app.user-service.host}")
     private String userServiceUrl;
 
@@ -43,22 +46,23 @@ public class GameRoomService {
         return response.getBody();*/
     }
 
-    public CreateGamesDto createGame() {
+    public CreatedRoomDto createGame(String token) {
         /*var createdRoom = gameRoomRepo.save(new GameRoom());
 
+//привязка
         ResponseEntity<CreateGamesDto> response = restTemplate
                 .postForEntity("http://" + gamePluginServiceUrl + ":8080/game-plugin/game-plugins-service/games", new CreateGamesDto(createdRoom.getId(), "ws://localhost:8080/ws"),  CreateGamesDto.class);
         return response.getBody();*/
-        return new CreateGamesDto(1L, "url1");
+        return new CreatedRoomDto(1L);
     }
 
-    public void userConnect(UserConnectRequest userConnectRequest) throws BadRequestException {
+    public void userConnect(String token, UserConnectRequest userConnectRequest) throws BadRequestException {
         /*var user = userRepo.findById(userConnectRequest.userId()).orElseThrow(() -> new BadRequestException("unknown user id"));
         user.setGameRoomId(userConnectRequest.roomId());
         userRepo.save(user);*/
     }
 
-    public void userDisconnect(UserDisconnectRequest userConnectRequest) throws BadRequestException {
+    public void userDisconnect(String token) throws BadRequestException {
         /*var user = userRepo.findById(userConnectRequest.userId()).orElseThrow(() -> new BadRequestException("unknown user id"));
         user.setGameRoomId(null);
         userRepo.save(user);*/
@@ -82,5 +86,11 @@ public class GameRoomService {
         userRepo.findAll().forEach(roomUsers::add);
 
         return roomUsers.stream().filter(u -> Objects.equals(u.getGameRoomId(), roomId)).toList();
+    }
+
+    private UserDto getUserByToken(String token) {
+        ResponseEntity<UserDto> response = restTemplate
+                .getForEntity("http://" + authServiceUrl + ":8080/auth-service/api/v1/validate",  UserDto.class);
+        return response.getBody();
     }
 }

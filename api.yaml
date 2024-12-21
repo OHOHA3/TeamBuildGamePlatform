@@ -340,6 +340,13 @@ paths:
   # ================================
   /game-room-service/api/v1/user/connect:
     post:
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: Bearer eyJhbGciOiJIUzI1NiIsInR5...
       summary: Юзер зашел в комнату
       description: Юзер зашел в комнату
       tags:
@@ -358,16 +365,17 @@ paths:
 
   /game-room-service/api/v1/user/disconnect:
     post:
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: Bearer eyJhbGciOiJIUzI1NiIsInR5...
       summary: Юзер покинул комнату
       description: Юзер покинул комнату
       tags:
         - game-room-service
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserDisconnectRequest'
       responses:
         '200':
           description: Юзер успешно покинул комнату
@@ -392,6 +400,13 @@ paths:
 
   /game-room-service/api/v1/game/create:
     get:
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+            example: Bearer eyJhbGciOiJIUzI1NiIsInR5...
       summary: Создать игру
       description: Создать игру
       tags:
@@ -402,7 +417,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateGamesDto'
+                $ref: '#/components/schemas/CreatedRoomDto'
 
   # ================================
   # Это пример эндпоинта на новый сервис.
@@ -483,21 +498,8 @@ components:
         roomId:
           type: integer
           example: 1
-        userId:
-          type: integer
-          example: 1
       required:
         - roomId
-        - userId
-
-    UserDisconnectRequest:
-      type: object
-      properties:
-        userId:
-          type: integer
-          example: 1
-      required:
-        - userId
 
     GameDto:
       type: object
@@ -520,18 +522,14 @@ components:
         - version
         - description
 
-    CreateGamesDto:
+    CreatedRoomDto:
       type: object
       properties:
-        id:
+        roomId:
           type: integer
           example: 1
-        webSocketUrl:
-          type: string
-          example: http://example.com
       required:
-        - userId
-        - webSocketUrl
+        - roomId
     # ================================
     # Схемы аутентификации
     # ================================

@@ -70,7 +70,7 @@ public class GameRoomService {
 
     public List<UserDto> getUsers() {
         ResponseEntity<List<UserDto>> response = restTemplate
-                .exchange("http://" + gamePluginServiceUrl + ":8080/user-service/api/v1/users", HttpMethod.GET, null,  new ParameterizedTypeReference<List<UserDto>>() {
+                .exchange("http://" + userServiceUrl + ":8080/user-service/api/v1/users", HttpMethod.GET, null,  new ParameterizedTypeReference<List<UserDto>>() {
                 });
         return response.getBody();
     }

@@ -44,7 +44,7 @@ public class GameRoomController {
         gameRoomService.userDisconnect(token);
     }
 
-    @MessageMapping("/game/status")
+    /*@MessageMapping("/game/status")
     public void getGameStatus(@Payload GameStatusDto gameStatusDto) throws BadRequestException {
         gameRoomService.getGameStatus(gameStatusDto);
     }
@@ -59,5 +59,19 @@ public class GameRoomController {
         messagingTemplate.convertAndSendToUser(
                 String.valueOf(roomUsersRequest.gameId()),"/queue/messages",
                 updatedList);
+    }*/
+
+    @PostMapping("/game/status")
+    public void gameStatus(@RequestBody GameStatusDto gameStatusDto) throws BadRequestException {
+        gameRoomService.getGameStatus(gameStatusDto);
     }
+
+    @PostMapping("/room/users")
+    public List<UserDto> getRoomUsers(@RequestBody RoomUsersRequest roomUsersRequest) {
+        List<UserDto> users = gameRoomService.getUsers();
+        List<User> roomUsers = gameRoomService.getRoomUsers(roomUsersRequest.roomId());
+
+        return roomUsers.stream().map(u -> users.stream().filter(apiU -> Objects.equals(apiU.id(), String.valueOf(u.getId()))).findAny().orElse(null)).toList();
+    }
+
 }

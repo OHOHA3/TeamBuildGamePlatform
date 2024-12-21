@@ -419,6 +419,46 @@ paths:
               schema:
                 $ref: '#/components/schemas/CreatedRoomDto'
 
+  /game-room-service/api/v1/game/status:
+    post:
+      summary: Получить статус игры
+      description: Получить статус игры
+      tags:
+        - game-room-service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GameStatusDto'
+      responses:
+        '200':
+          description: успешно обновлен статус игры
+        '400':
+          description: Игра не найдена
+
+  /game-room-service/api/v1/room/users:
+    post:
+      summary: Получить игроков комнаты
+      description: Получить игроков комнаты
+      tags:
+        - game-room-service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoomUsersRequest'
+      responses:
+        '200':
+          description: Список всех доступных игр
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDto'
+
   # ================================
   # Это пример эндпоинта на новый сервис.
   # Обязательно указываем тэг сервиса.
@@ -530,6 +570,66 @@ components:
           example: 1
       required:
         - roomId
+
+    GameStatusDto:
+      type: object
+      properties:
+        gameId:
+          type: integer
+          example: 1
+        status:
+          type: string
+          example: running
+      required:
+        - gameId
+        - status
+
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 1
+        username:
+          type: string
+          example: john_doe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        team:
+          type: string
+          example: Team Alpha
+        role:
+          type: string
+          example: user
+        created_at:
+          type: string
+          example: "2024-12-10T03:59:28.442+0700"
+        updated_at:
+          type: string
+          example: "2024-12-10T04:00:00.000+0700"
+      required:
+        - id
+        - username
+        - email
+        - role
+        - created_at
+        - updated_at
+
+    RoomUsersRequest:
+      type: object
+      properties:
+        gameId:
+          type: integer
+          example: 1
+        roomId:
+          type: integer
+          example: 1
+      required:
+        - gameId
+        - roomId
+
     # ================================
     # Схемы аутентификации
     # ================================
@@ -575,7 +675,7 @@ components:
         - id
         - login
         - role
-        
+
     UserRole:
       type: string
       description: Возможные роли пользователя в системе
@@ -584,7 +684,7 @@ components:
         - admin
         - hr
       example: user
-      
+
     UserStatus:
       type: string
       description: Возможные статусы пользователя

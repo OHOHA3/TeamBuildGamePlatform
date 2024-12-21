@@ -3,7 +3,7 @@ package com.example.service.dto;
 import java.time.LocalDateTime;
 
 public record UserDto(
-        Long id,
+        String id,
         String username,
         String email,
         String team,

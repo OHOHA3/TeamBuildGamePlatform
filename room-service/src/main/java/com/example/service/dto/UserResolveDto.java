@@ -1,7 +1,7 @@
 package com.example.service.dto;
 
 public record UserResolveDto(
-        Long id,
+        String id,
         String login,
         String role
 ) {

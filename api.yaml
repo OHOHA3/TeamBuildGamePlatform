@@ -536,7 +536,7 @@ components:
       type: object
       properties:
         roomId:
-          type: integer
+          type: string
           example: 1
       required:
         - roomId

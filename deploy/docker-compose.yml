@@ -29,7 +29,7 @@ services:
     container_name: game-plugins-service
     environment:
       GAMEDB_URL: ${GAMEDB_URL}
-      GAMESDB_USER: ${GAMESDB_PASSWORD}
+      GAMESDB_USER: ${GAMESDB_USER}
       GAMESDB_PASSWORD: ${GAMESDB_PASSWORD}
       DOCKER_HOST_URL: ${DOCKER_HOST_URL}
       DOCKER_USERNAME: ${DOCKER_USERNAME}

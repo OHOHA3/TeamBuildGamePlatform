@@ -1,12 +1,12 @@
 package handlers
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -36,7 +36,7 @@ func NewHandler(db *gorm.DB, validate *validator.Validate) *Handler {
 // @Produce json
 // @Param user body models.UserCreateRequest true "Данные пользователя"
 // @Success 201 {object} models.UserResponse "Пользователь успешно создан"
-// @Failure 400 {object} handlers.ErrorResponse "Пользователь с таким email или username уже существует"
+// @Failure 400 {object} handlers.ErrorResponse "Пользователь с таким login или email уже существует"
 // @Failure 422 {object} handlers.ErrorResponse "Некорректные данные запроса"
 // @Failure 500 {object} handlers.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /user-service/api/v1/register [post]
@@ -61,11 +61,11 @@ func (h *Handler) CreateUserHandler(c *gin.Context) {
 	}
 
 	var existing models.User
-	if err := h.DB.Where("username = ? OR email = ?", req.Username, req.Email).First(&existing).Error; err == nil {
-		config.Logger.Warn("Пользователь с таким username или email уже существует", zap.String("username", req.Username), zap.String("email", req.Email))
+	if err := h.DB.Where("login = ? OR email = ?", req.Login, req.Email).First(&existing).Error; err == nil {
+		config.Logger.Warn("Пользователь с таким login или email уже существует", zap.String("login", req.Login), zap.String("email", req.Email))
 		c.JSON(http.StatusBadRequest, ErrorResponse{
 			Code:    400,
-			Message: "Пользователь с таким username или email уже существует",
+			Message: "Пользователь с таким login или email уже существует",
 		})
 		return
 	} else if err != gorm.ErrRecordNotFound {
@@ -88,12 +88,11 @@ func (h *Handler) CreateUserHandler(c *gin.Context) {
 	}
 
 	user := models.User{
-		ID:           uuid.New(),
-		Username:     req.Username,
+		Login:        req.Login,
 		Email:        req.Email,
 		PasswordHash: string(hashedPassword),
-		Team:         req.Team,
 		Role:         req.Role,
+		Status:       "active", // Установка статуса по умолчанию
 	}
 
 	if err := h.DB.Create(&user).Error; err != nil {
@@ -106,18 +105,18 @@ func (h *Handler) CreateUserHandler(c *gin.Context) {
 	}
 
 	response := models.UserResponse{
-		ID:        user.ID.String(),
-		Username:  user.Username,
+		ID:        user.ID,
+		Login:     user.Login,
 		Email:     user.Email,
-		Team:      user.Team,
 		Role:      user.Role,
+		Status:    user.Status,
 		CreatedAt: user.CreatedAt.Format(time.RFC3339),
 		UpdatedAt: user.UpdatedAt.Format(time.RFC3339),
 	}
 
 	c.JSON(http.StatusCreated, response)
 
-	config.Logger.Info("Пользователь создан", zap.String("id", user.ID.String()), zap.String("username", user.Username))
+	config.Logger.Info("Пользователь создан", zap.Int("id", user.ID), zap.String("login", user.Login))
 }
 
 // GetAllUsersHandler обрабатывает получение списка всех пользователей
@@ -144,11 +143,11 @@ func (h *Handler) GetAllUsersHandler(c *gin.Context) {
 	var response []models.UserResponse
 	for _, user := range users {
 		response = append(response, models.UserResponse{
-			ID:        user.ID.String(),
-			Username:  user.Username,
+			ID:        user.ID,
+			Login:     user.Login,
 			Email:     user.Email,
-			Team:      user.Team,
 			Role:      user.Role,
+			Status:    user.Status,
 			CreatedAt: user.CreatedAt.Format(time.RFC3339),
 			UpdatedAt: user.UpdatedAt.Format(time.RFC3339),
 		})
@@ -166,17 +165,27 @@ func (h *Handler) GetAllUsersHandler(c *gin.Context) {
 // @Security BearerAuth
 // @Accept json
 // @Produce json
-// @Param id path string true "ID пользователя (UUID)"
+// @Param id path int true "ID пользователя (integer)"
 // @Success 200 {object} models.UserResponse "Информация о пользователе"
 // @Failure 404 {object} handlers.ErrorResponse "Пользователь не найден"
 // @Failure 500 {object} handlers.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /user-service/api/v1/users/{id} [get]
 func (h *Handler) GetUserByIDHandler(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	userID, err := strconv.Atoi(idStr)
+	if err != nil {
+		config.Logger.Warn("Некорректный формат ID пользователя", zap.String("id", idStr))
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Code:    400,
+			Message: "Некорректный формат ID пользователя",
+		})
+		return
+	}
+
 	var user models.User
-	if err := h.DB.First(&user, "id = ?", id).Error; err != nil {
+	if err := h.DB.First(&user, "id = ?", userID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			config.Logger.Warn("Пользователь не найден при запросе по ID", zap.String("id", id))
+			config.Logger.Warn("Пользователь не найден при запросе по ID", zap.Int("id", userID))
 			c.JSON(http.StatusNotFound, ErrorResponse{
 				Code:    404,
 				Message: "Пользователь не найден",
@@ -192,18 +201,18 @@ func (h *Handler) GetUserByIDHandler(c *gin.Context) {
 	}
 
 	response := models.UserResponse{
-		ID:        user.ID.String(),
-		Username:  user.Username,
+		ID:        user.ID,
+		Login:     user.Login,
 		Email:     user.Email,
-		Team:      user.Team,
 		Role:      user.Role,
+		Status:    user.Status,
 		CreatedAt: user.CreatedAt.Format(time.RFC3339),
 		UpdatedAt: user.UpdatedAt.Format(time.RFC3339),
 	}
 
 	c.JSON(http.StatusOK, response)
 
-	config.Logger.Info("Получен пользователь по ID", zap.String("id", id))
+	config.Logger.Info("Получен пользователь по ID", zap.Int("id", user.ID), zap.String("login", user.Login))
 }
 
 // UpdateUserHandler обрабатывает обновление данных пользователя
@@ -213,7 +222,7 @@ func (h *Handler) GetUserByIDHandler(c *gin.Context) {
 // @Security BearerAuth
 // @Accept json
 // @Produce json
-// @Param id path string true "ID пользователя (UUID)"
+// @Param id path int true "ID пользователя (integer)"
 // @Param user body models.UserUpdateRequest true "Данные для обновления"
 // @Success 200 {object} models.UserResponse "Пользователь успешно обновлен"
 // @Failure 400 {object} handlers.ErrorResponse "Некорректные данные запроса"
@@ -223,7 +232,17 @@ func (h *Handler) GetUserByIDHandler(c *gin.Context) {
 // @Failure 500 {object} handlers.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /user-service/api/v1/users/{id} [put]
 func (h *Handler) UpdateUserHandler(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	userID, err := strconv.Atoi(idStr)
+	if err != nil {
+		config.Logger.Warn("Некорректный формат ID пользователя", zap.String("id", idStr))
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Code:    400,
+			Message: "Некорректный формат ID пользователя",
+		})
+		return
+	}
+
 	var req models.UserUpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		config.Logger.Warn("Некорректные данные запроса при обновлении пользователя", zap.Error(err))
@@ -244,9 +263,9 @@ func (h *Handler) UpdateUserHandler(c *gin.Context) {
 	}
 
 	var user models.User
-	if err := h.DB.First(&user, "id = ?", id).Error; err != nil {
+	if err := h.DB.First(&user, "id = ?", userID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			config.Logger.Warn("Пользователь не найден при обновлении", zap.String("id", id))
+			config.Logger.Warn("Пользователь не найден при обновлении", zap.Int("id", userID))
 			c.JSON(http.StatusNotFound, ErrorResponse{
 				Code:    404,
 				Message: "Пользователь не найден",
@@ -261,7 +280,7 @@ func (h *Handler) UpdateUserHandler(c *gin.Context) {
 		return
 	}
 
-	// Оставляем авторизацию, если она всё ещё нужна
+	// Проверка прав пользователя
 	claims, exists := c.Get("claims")
 	if !exists {
 		config.Logger.Error("Claims отсутствуют в контексте при обновлении пользователя")
@@ -282,7 +301,7 @@ func (h *Handler) UpdateUserHandler(c *gin.Context) {
 		return
 	}
 
-	userID, ok := jwtClaims["user_id"].(string)
+	userIDFloat, ok := jwtClaims["user_id"].(float64)
 	if !ok {
 		config.Logger.Error("Некорректный user_id в claims при обновлении пользователя")
 		c.JSON(http.StatusInternalServerError, ErrorResponse{
@@ -291,6 +310,7 @@ func (h *Handler) UpdateUserHandler(c *gin.Context) {
 		})
 		return
 	}
+	userIDClaim := int(userIDFloat)
 
 	userRole, ok := jwtClaims["role"].(string)
 	if !ok {
@@ -302,8 +322,8 @@ func (h *Handler) UpdateUserHandler(c *gin.Context) {
 		return
 	}
 
-	if userID != user.ID.String() && userRole != "admin" {
-		config.Logger.Warn("Недостаточно прав для обновления данных пользователя", zap.String("user_id", userID), zap.String("target_user_id", user.ID.String()))
+	if userIDClaim != user.ID && userRole != "admin" {
+		config.Logger.Warn("Недостаточно прав для обновления данных пользователя", zap.Int("user_id", userIDClaim), zap.Int("target_user_id", user.ID))
 		c.JSON(http.StatusForbidden, ErrorResponse{
 			Code:    403,
 			Message: "Недостаточно прав для обновления данных этого пользователя",
@@ -311,13 +331,13 @@ func (h *Handler) UpdateUserHandler(c *gin.Context) {
 		return
 	}
 
-	if user.Username != req.Username || user.Email != req.Email {
+	if user.Login != req.Login || user.Email != req.Email {
 		var existing models.User
-		if err := h.DB.Where("(username = ? OR email = ?) AND id <> ?", req.Username, req.Email, user.ID).First(&existing).Error; err == nil {
-			config.Logger.Warn("Пользователь с таким username или email уже существует при обновлении", zap.String("username", req.Username), zap.String("email", req.Email))
+		if err := h.DB.Where("(login = ? OR email = ?) AND id <> ?", req.Login, req.Email, user.ID).First(&existing).Error; err == nil {
+			config.Logger.Warn("Пользователь с таким login или email уже существует при обновлении", zap.String("login", req.Login), zap.String("email", req.Email))
 			c.JSON(http.StatusBadRequest, ErrorResponse{
 				Code:    400,
-				Message: "Пользователь с таким username или email уже существует",
+				Message: "Пользователь с таким login или email уже существует",
 			})
 			return
 		} else if err != gorm.ErrRecordNotFound {
@@ -330,10 +350,10 @@ func (h *Handler) UpdateUserHandler(c *gin.Context) {
 		}
 	}
 
-	user.Username = req.Username
+	user.Login = req.Login
 	user.Email = req.Email
-	user.Team = req.Team
 	user.Role = req.Role
+	user.Status = req.Status
 
 	if req.Password != "" {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
@@ -358,18 +378,18 @@ func (h *Handler) UpdateUserHandler(c *gin.Context) {
 	}
 
 	response := models.UserResponse{
-		ID:        user.ID.String(),
-		Username:  user.Username,
+		ID:        user.ID,
+		Login:     user.Login,
 		Email:     user.Email,
-		Team:      user.Team,
 		Role:      user.Role,
+		Status:    user.Status,
 		CreatedAt: user.CreatedAt.Format(time.RFC3339),
 		UpdatedAt: user.UpdatedAt.Format(time.RFC3339),
 	}
 
 	c.JSON(http.StatusOK, response)
 
-	config.Logger.Info("Пользователь обновлён", zap.String("id", user.ID.String()), zap.String("username", user.Username))
+	config.Logger.Info("Пользователь обновлён", zap.Int("id", user.ID), zap.String("login", user.Login))
 }
 
 // DeleteUserHandler обрабатывает удаление пользователя
@@ -379,17 +399,27 @@ func (h *Handler) UpdateUserHandler(c *gin.Context) {
 // @Security BearerAuth
 // @Accept json
 // @Produce json
-// @Param id path string true "ID пользователя (UUID)"
+// @Param id path int true "ID пользователя (integer)"
 // @Success 200 {object} handlers.SuccessResponse "Пользователь успешно удалён"
 // @Failure 404 {object} handlers.ErrorResponse "Пользователь не найден"
 // @Failure 500 {object} handlers.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /user-service/api/v1/users/{id} [delete]
 func (h *Handler) DeleteUserHandler(c *gin.Context) {
-	id := c.Param("id")
+	idStr := c.Param("id")
+	userID, err := strconv.Atoi(idStr)
+	if err != nil {
+		config.Logger.Warn("Некорректный формат ID пользователя", zap.String("id", idStr))
+		c.JSON(http.StatusBadRequest, ErrorResponse{
+			Code:    400,
+			Message: "Некорректный формат ID пользователя",
+		})
+		return
+	}
+
 	var user models.User
-	if err := h.DB.First(&user, "id = ?", id).Error; err != nil {
+	if err := h.DB.First(&user, "id = ?", userID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			config.Logger.Warn("Пользователь не найден при удалении", zap.String("id", id))
+			config.Logger.Warn("Пользователь не найден при удалении", zap.Int("id", userID))
 			c.JSON(http.StatusNotFound, ErrorResponse{
 				Code:    404,
 				Message: "Пользователь не найден",
@@ -413,7 +443,7 @@ func (h *Handler) DeleteUserHandler(c *gin.Context) {
 		return
 	}
 
-	config.Logger.Info("Пользователь успешно удалён", zap.String("id", id))
+	config.Logger.Info("Пользователь успешно удалён", zap.Int("id", user.ID))
 	c.JSON(http.StatusOK, SuccessResponse{
 		Msg: "Пользователь успешно удален",
 	})

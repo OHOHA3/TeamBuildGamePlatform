@@ -2,8 +2,10 @@ package config
 
 import (
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
 	"os"
+	"regexp"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -21,6 +23,21 @@ func LoadConfig() {
 	JWTSecret = os.Getenv("JWT_SECRET")
 	if JWTSecret == "" {
 		Logger.Fatal("JWT_SECRET не установлен в переменных окружения")
+	}
+}
+
+func matches(fl validator.FieldLevel) bool {
+	// Регулярное выражение для поля 'Login'
+	regex := regexp.MustCompile(`^[a-zA-Z0-9.]{3,20}$`)
+	return regex.MatchString(fl.Field().String())
+}
+
+// Регистрация кастомных валидаторов
+func InitValidator(validate *validator.Validate) {
+	// Регистрация кастомного валидатора 'matches'
+	err := validate.RegisterValidation("matches", matches)
+	if err != nil {
+		Logger.Fatal("Не удалось зарегистрировать валидатор 'matches'", zap.Error(err))
 	}
 }
 

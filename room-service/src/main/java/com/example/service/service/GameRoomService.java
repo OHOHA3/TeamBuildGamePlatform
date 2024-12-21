@@ -35,30 +35,33 @@ public class GameRoomService {
     private String userServiceUrl;
 
     public List<GameDto> getAllAvailableGames() {
-        ResponseEntity<List<GameDto>> response = restTemplate
+        return List.of(new GameDto(1L, "game1", "v1", "description1"),
+                new GameDto(2L, "game2", "v2", "description2"));
+        /*ResponseEntity<List<GameDto>> response = restTemplate
                 .exchange("http://" + gamePluginServiceUrl + ":8080/game-plugin/game-plugins-service/games", HttpMethod.GET, null,  new ParameterizedTypeReference<List<GameDto>>() {
                 });
-        return response.getBody();
+        return response.getBody();*/
     }
 
     public CreateGamesDto createGame() {
-        var createdRoom = gameRoomRepo.save(new GameRoom());
+        /*var createdRoom = gameRoomRepo.save(new GameRoom());
 
         ResponseEntity<CreateGamesDto> response = restTemplate
                 .postForEntity("http://" + gamePluginServiceUrl + ":8080/game-plugin/game-plugins-service/games", new CreateGamesDto(createdRoom.getId(), "ws://localhost:8080/ws"),  CreateGamesDto.class);
-        return response.getBody();
+        return response.getBody();*/
+        return new CreateGamesDto(1L, "url1");
     }
 
     public void userConnect(UserConnectRequest userConnectRequest) throws BadRequestException {
-        var user = userRepo.findById(userConnectRequest.userId()).orElseThrow(() -> new BadRequestException("unknown user id"));
+        /*var user = userRepo.findById(userConnectRequest.userId()).orElseThrow(() -> new BadRequestException("unknown user id"));
         user.setGameRoomId(userConnectRequest.roomId());
-        userRepo.save(user);
+        userRepo.save(user);*/
     }
 
     public void userDisconnect(UserDisconnectRequest userConnectRequest) throws BadRequestException {
-        var user = userRepo.findById(userConnectRequest.userId()).orElseThrow(() -> new BadRequestException("unknown user id"));
+        /*var user = userRepo.findById(userConnectRequest.userId()).orElseThrow(() -> new BadRequestException("unknown user id"));
         user.setGameRoomId(null);
-        userRepo.save(user);
+        userRepo.save(user);*/
     }
 
     public List<UserDto> getUsers() {

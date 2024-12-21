@@ -15,7 +15,11 @@ definitions:
   models.UserCreateRequest:
     properties:
       email:
-        maxLength: 256
+        maxLength: 255
+        type: string
+      login:
+        maxLength: 20
+        minLength: 3
         type: string
       password:
         maxLength: 64
@@ -27,18 +31,11 @@ definitions:
         - user
         - hr
         type: string
-      team:
-        maxLength: 100
-        type: string
-      username:
-        maxLength: 25
-        minLength: 3
-        type: string
     required:
     - email
+    - login
     - password
     - role
-    - username
     type: object
   models.UserResponse:
     properties:
@@ -47,20 +44,24 @@ definitions:
       email:
         type: string
       id:
+        type: integer
+      login:
         type: string
       role:
         type: string
-      team:
+      status:
         type: string
       updated_at:
-        type: string
-      username:
         type: string
     type: object
   models.UserUpdateRequest:
     properties:
       email:
-        maxLength: 256
+        maxLength: 255
+        type: string
+      login:
+        maxLength: 20
+        minLength: 3
         type: string
       password:
         maxLength: 64
@@ -72,17 +73,16 @@ definitions:
         - user
         - hr
         type: string
-      team:
-        maxLength: 100
-        type: string
-      username:
-        maxLength: 25
-        minLength: 3
+      status:
+        enum:
+        - active
+        - blocked
         type: string
     required:
     - email
+    - login
     - role
-    - username
+    - status
     type: object
 host: localhost:8080
 info:
@@ -118,7 +118,7 @@ paths:
           schema:
             $ref: '#/definitions/models.UserResponse'
         "400":
-          description: Пользователь с таким email или username уже существует
+          description: Пользователь с таким login или email уже существует
           schema:
             $ref: '#/definitions/handlers.ErrorResponse'
         "422":
@@ -161,11 +161,11 @@ paths:
       - application/json
       description: Удаляет пользователя по его ID
       parameters:
-      - description: ID пользователя (UUID)
+      - description: ID пользователя (integer)
         in: path
         name: id
         required: true
-        type: string
+        type: integer
       produces:
       - application/json
       responses:
@@ -191,11 +191,11 @@ paths:
       - application/json
       description: Возвращает пользователя по его ID
       parameters:
-      - description: ID пользователя (UUID)
+      - description: ID пользователя (integer)
         in: path
         name: id
         required: true
-        type: string
+        type: integer
       produces:
       - application/json
       responses:
@@ -221,11 +221,11 @@ paths:
       - application/json
       description: Обновляет данные пользователя по его ID
       parameters:
-      - description: ID пользователя (UUID)
+      - description: ID пользователя (integer)
         in: path
         name: id
         required: true
-        type: string
+        type: integer
       - description: Данные для обновления
         in: body
         name: user

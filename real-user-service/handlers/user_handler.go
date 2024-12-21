@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/golang-jwt/jwt/v4"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -281,55 +280,55 @@ func (h *Handler) UpdateUserHandler(c *gin.Context) {
 	}
 
 	// Проверка прав пользователя
-	claims, exists := c.Get("claims")
-	if !exists {
-		config.Logger.Error("Claims отсутствуют в контексте при обновлении пользователя")
-		c.JSON(http.StatusInternalServerError, ErrorResponse{
-			Code:    500,
-			Message: "Claims отсутствуют в контексте",
-		})
-		return
-	}
+	//claims, exists := c.Get("claims")
+	//if !exists {
+	//	config.Logger.Error("Claims отсутствуют в контексте при обновлении пользователя")
+	//	c.JSON(http.StatusInternalServerError, ErrorResponse{
+	//		Code:    500,
+	//		Message: "Claims отсутствуют в контексте",
+	//	})
+	//	return
+	//}
 
-	jwtClaims, ok := claims.(jwt.MapClaims)
-	if !ok {
-		config.Logger.Error("Некорректные claims при обновлении пользователя")
-		c.JSON(http.StatusInternalServerError, ErrorResponse{
-			Code:    500,
-			Message: "Некорректные claims",
-		})
-		return
-	}
-
-	userIDFloat, ok := jwtClaims["user_id"].(float64)
-	if !ok {
-		config.Logger.Error("Некорректный user_id в claims при обновлении пользователя")
-		c.JSON(http.StatusInternalServerError, ErrorResponse{
-			Code:    500,
-			Message: "Некорректный user_id в claims",
-		})
-		return
-	}
-	userIDClaim := int(userIDFloat)
-
-	userRole, ok := jwtClaims["role"].(string)
-	if !ok {
-		config.Logger.Error("Некорректная роль в claims при обновлении пользователя")
-		c.JSON(http.StatusInternalServerError, ErrorResponse{
-			Code:    500,
-			Message: "Некорректная роль в claims",
-		})
-		return
-	}
-
-	if userIDClaim != user.ID && userRole != "admin" {
-		config.Logger.Warn("Недостаточно прав для обновления данных пользователя", zap.Int("user_id", userIDClaim), zap.Int("target_user_id", user.ID))
-		c.JSON(http.StatusForbidden, ErrorResponse{
-			Code:    403,
-			Message: "Недостаточно прав для обновления данных этого пользователя",
-		})
-		return
-	}
+	//jwtClaims, ok := claims.(jwt.MapClaims)
+	//if !ok {
+	//	config.Logger.Error("Некорректные claims при обновлении пользователя")
+	//	c.JSON(http.StatusInternalServerError, ErrorResponse{
+	//		Code:    500,
+	//		Message: "Некорректные claims",
+	//	})
+	//	return
+	//}
+	//
+	//userIDFloat, ok := jwtClaims["user_id"].(float64)
+	//if !ok {
+	//	config.Logger.Error("Некорректный user_id в claims при обновлении пользователя")
+	//	c.JSON(http.StatusInternalServerError, ErrorResponse{
+	//		Code:    500,
+	//		Message: "Некорректный user_id в claims",
+	//	})
+	//	return
+	//}
+	//userIDClaim := int(userIDFloat)
+	//
+	//userRole, ok := jwtClaims["role"].(string)
+	//if !ok {
+	//	config.Logger.Error("Некорректная роль в claims при обновлении пользователя")
+	//	c.JSON(http.StatusInternalServerError, ErrorResponse{
+	//		Code:    500,
+	//		Message: "Некорректная роль в claims",
+	//	})
+	//	return
+	//}
+	//
+	//if userIDClaim != user.ID && userRole != "admin" {
+	//	config.Logger.Warn("Недостаточно прав для обновления данных пользователя", zap.Int("user_id", userIDClaim), zap.Int("target_user_id", user.ID))
+	//	c.JSON(http.StatusForbidden, ErrorResponse{
+	//		Code:    403,
+	//		Message: "Недостаточно прав для обновления данных этого пользователя",
+	//	})
+	//	return
+	//}
 
 	if user.Login != req.Login || user.Email != req.Email {
 		var existing models.User

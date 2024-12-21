@@ -6,12 +6,10 @@ import (
 	"go.uber.org/zap"
 	"os"
 
-	"real-user-service/config"
-	"real-user-service/handlers"
-	"real-user-service/middleware"
-
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+	"real-user-service/config"
+	"real-user-service/handlers"
 
 	_ "real-user-service/docs" // Импортируйте сгенерированные Swagger документы
 )
@@ -57,11 +55,20 @@ func main() {
 	users := router.Group("/user-service/api/v1")
 	{
 		users.POST("/register", h.CreateUserHandler)
-		users.GET("/users", middleware.AuthMiddleware(), h.GetAllUsersHandler)
-		users.GET("/users/:id", middleware.AuthMiddleware(), h.GetUserByIDHandler)
-		users.PUT("/users/:id", middleware.AuthMiddleware(), h.UpdateUserHandler)
-		users.DELETE("/users/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware("admin"), h.DeleteUserHandler)
+		users.GET("/users", h.GetAllUsersHandler)
+		users.GET("/users/:id", h.GetUserByIDHandler)
+		users.PUT("/users/:id", h.UpdateUserHandler)
+		users.DELETE("/users/:id", h.DeleteUserHandler) // Роль "admin" больше не требуется
 	}
+
+	//users := router.Group("/user-service/api/v1")
+	//{
+	//	users.POST("/register", h.CreateUserHandler)
+	//	users.GET("/users", middleware.AuthMiddleware(), h.GetAllUsersHandler)
+	//	users.GET("/users/:id", middleware.AuthMiddleware(), h.GetUserByIDHandler)
+	//	users.PUT("/users/:id", middleware.AuthMiddleware(), h.UpdateUserHandler)
+	//	users.DELETE("/users/:id", middleware.AuthMiddleware(), middleware.RoleMiddleware("admin"), h.DeleteUserHandler)
+	//}
 
 	port := os.Getenv("PORT")
 	if port == "" {

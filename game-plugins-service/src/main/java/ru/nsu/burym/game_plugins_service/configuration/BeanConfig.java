@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
 import java.net.URI;
 import java.util.Objects;
@@ -45,5 +46,15 @@ public class BeanConfig {
         return new AuthConfig()
                 .withUsername(environment.getProperty("dockerUsername"))
                 .withUsername(environment.getProperty("dockerPassword"));
+    }
+
+    @Bean
+    public CommonsRequestLoggingFilter requestLoggingFilter() {
+        CommonsRequestLoggingFilter loggingFilter = new CommonsRequestLoggingFilter();
+        loggingFilter.setIncludeClientInfo(true);
+        loggingFilter.setIncludeQueryString(true);
+        loggingFilter.setIncludePayload(true);
+        loggingFilter.setMaxPayloadLength(64000);
+        return loggingFilter;
     }
 }

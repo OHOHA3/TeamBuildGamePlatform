@@ -6,8 +6,6 @@ import com.example.service.service.GameRoomService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +15,7 @@ import java.util.Objects;
 @RestController
 @RequestMapping("/game-room-service/api/v1")
 @RequiredArgsConstructor
+@CrossOrigin
 public class GameRoomController {
     private final GameRoomService gameRoomService;
     private final SimpMessagingTemplate messagingTemplate;
@@ -43,23 +42,6 @@ public class GameRoomController {
         String token = request.getHeader("Authorization");
         gameRoomService.userDisconnect(token);
     }
-
-    /*@MessageMapping("/game/status")
-    public void getGameStatus(@Payload GameStatusDto gameStatusDto) throws BadRequestException {
-        gameRoomService.getGameStatus(gameStatusDto);
-    }
-
-    @MessageMapping("/room/users")
-    public void getUsers(@Payload RoomUsersRequest roomUsersRequest) {
-        List<UserDto> users = gameRoomService.getUsers();
-        List<User> roomUsers = gameRoomService.getRoomUsers(roomUsersRequest.roomId());
-
-        var updatedList = roomUsers.stream().map(u -> users.stream().filter(apiU -> Objects.equals(apiU.id(), u.getId())).findAny().orElse(null)).toList();
-
-        messagingTemplate.convertAndSendToUser(
-                String.valueOf(roomUsersRequest.gameId()),"/queue/messages",
-                updatedList);
-    }*/
 
     @PostMapping("/game/status")
     public void gameStatus(@RequestBody GameStatusDto gameStatusDto) throws BadRequestException {

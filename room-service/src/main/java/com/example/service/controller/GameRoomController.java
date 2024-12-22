@@ -18,7 +18,6 @@ import java.util.Objects;
 @CrossOrigin
 public class GameRoomController {
     private final GameRoomService gameRoomService;
-    private final SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/game/get-all")
     public List<GameDto> getAllAvailableGames() {

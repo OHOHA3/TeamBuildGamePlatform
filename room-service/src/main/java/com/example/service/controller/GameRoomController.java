@@ -50,13 +50,13 @@ public class GameRoomController {
 
     @PostMapping("/room/users")
     public List<UserDto> getRoomUsers(@RequestBody RoomUsersRequest roomUsersRequest) {
-//        List<UserDto> users = gameRoomService.getUsers();
-//        List<User> roomUsers = gameRoomService.getRoomUsers(roomUsersRequest.roomId());
-//
-//        return roomUsers.stream().map(u -> users.stream().filter(apiU -> Objects.equals(apiU.id(), String.valueOf(u.getId()))).findAny().orElse(null)).toList();
+        List<UserDto> users = gameRoomService.getUsers();
+        List<User> roomUsers = gameRoomService.getRoomUsers(roomUsersRequest.roomId());
 
-        return List.of(new UserDto("1", "name3", "email3", "team3", "role3", LocalDateTime.now(), LocalDateTime.now()),
-                new UserDto("2", "name2", "email2", "team2", "role2", LocalDateTime.now(), LocalDateTime.now()));
+        return roomUsers.stream().map(u -> users.stream().filter(apiU -> Objects.equals(apiU.id(), String.valueOf(u.getId()))).findAny().orElse(null)).toList();
+
+        /*return List.of(new UserDto("1", "name3", "email3", "team3", "role3", LocalDateTime.now(), LocalDateTime.now()),
+                new UserDto("2", "name2", "email2", "team2", "role2", LocalDateTime.now(), LocalDateTime.now()));*/
     }
 
 }

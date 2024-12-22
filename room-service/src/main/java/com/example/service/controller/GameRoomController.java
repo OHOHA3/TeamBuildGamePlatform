@@ -9,6 +9,7 @@ import org.apache.coyote.BadRequestException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -49,10 +50,13 @@ public class GameRoomController {
 
     @PostMapping("/room/users")
     public List<UserDto> getRoomUsers(@RequestBody RoomUsersRequest roomUsersRequest) {
-        List<UserDto> users = gameRoomService.getUsers();
-        List<User> roomUsers = gameRoomService.getRoomUsers(roomUsersRequest.roomId());
+//        List<UserDto> users = gameRoomService.getUsers();
+//        List<User> roomUsers = gameRoomService.getRoomUsers(roomUsersRequest.roomId());
+//
+//        return roomUsers.stream().map(u -> users.stream().filter(apiU -> Objects.equals(apiU.id(), String.valueOf(u.getId()))).findAny().orElse(null)).toList();
 
-        return roomUsers.stream().map(u -> users.stream().filter(apiU -> Objects.equals(apiU.id(), String.valueOf(u.getId()))).findAny().orElse(null)).toList();
+        return List.of(new UserDto("1", "name3", "email3", "team3", "role3", LocalDateTime.now(), LocalDateTime.now()),
+                new UserDto("2", "name2", "email2", "team2", "role2", LocalDateTime.now(), LocalDateTime.now()));
     }
 
 }

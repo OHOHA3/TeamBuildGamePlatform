@@ -67,8 +67,6 @@ paths:
               examples:
                 incorrect game id:
                   value: Game id 3 not found
-                websocket url is null:
-                  value: webSocketUrl is null
 
   /game-plugins-service/api/v1/games/stop/{containerId}:
     get:
@@ -492,12 +490,8 @@ components:
         id:
           type: integer
           example: 1
-        webSocketUrl:
-          type: string
-          example: ws://example.com/socket
       required:
         - id
-        - webSocketUrl
     # ================================
     # Схемы сервиса игровых комнат
     # ================================

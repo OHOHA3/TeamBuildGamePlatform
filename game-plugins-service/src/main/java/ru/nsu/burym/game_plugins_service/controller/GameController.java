@@ -30,7 +30,7 @@ public class GameController {
     @PostMapping("/create")
     public ResponseEntity<String> createGameInstance(@RequestBody CreateInfo createInfo) {
         try {
-            String containerId = gameInfoService.createGameInstance(createInfo.id(), createInfo.webSocketUrl());
+            String containerId = gameInfoService.createGameInstance(createInfo.id(), "nothing");
             return ResponseEntity.ok(containerId);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

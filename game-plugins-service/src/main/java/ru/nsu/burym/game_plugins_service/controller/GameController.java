@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/game-plugins-service/api/v1/games")
+@CrossOrigin
 public class GameController {
 
     private final GameInfoService gameInfoService;

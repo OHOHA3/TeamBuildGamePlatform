@@ -1,7 +1,6 @@
 package com.example.service.service;
 
 import com.example.service.dto.*;
-import com.example.service.model.GameRoom;
 import com.example.service.model.User;
 import com.example.service.repo.GameRepo;
 import com.example.service.repo.GameRoomRepo;
@@ -9,10 +8,11 @@ import com.example.service.repo.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -89,8 +89,17 @@ public class GameRoomService {
     }
 
     private UserDto getUserByToken(String token) {
-        ResponseEntity<UserDto> response = restTemplate
-                .getForEntity("http://" + authServiceUrl + ":8080/auth-service/api/v1/validate",  UserDto.class);
+        /*ResponseEntity<UserDto> response = restTemplate
+                .getForEntity("http://" + authServiceUrl + ":8080/auth-service/api/v1/validate",  UserDto.class);*/
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.set("Authorization", token);
+
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<UserDto> response =
+                restTemplate.exchange("http://" + authServiceUrl + ":8080/auth-service/api/v1/validate", HttpMethod.GET, entity, UserDto.class);
         return response.getBody();
     }
 }

@@ -5,11 +5,14 @@ import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.exception.NotModifiedException;
 import com.github.dockerjava.api.model.AuthConfig;
+import com.github.dockerjava.api.model.Image;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Controller
@@ -27,12 +30,22 @@ public class DockerContainerHandler {
 
     public String createContainer(String imageName, String webSocketUrl) {
         try {
-            System.out.println("Pulling image: " + imageName);
-            dockerClient.pullImageCmd(imageName)
-                    .withAuthConfig(authConfig)
-                    .exec(new PullImageResultCallback())
-                    .awaitCompletion(60, TimeUnit.SECONDS);
-
+            boolean isPresent = false;
+            List<Image> images = dockerClient.listImagesCmd().exec();
+            for (Image image : images) {
+                String[] repoTags = image.getRepoTags();
+                if (Arrays.asList(repoTags).contains(imageName)) {
+                    isPresent = true;
+                    break;
+                }
+            }
+            if (!isPresent) {
+                System.out.println("Pulling image: " + imageName);
+                dockerClient.pullImageCmd(imageName)
+                        .withAuthConfig(authConfig)
+                        .exec(new PullImageResultCallback())
+                        .awaitCompletion(60, TimeUnit.SECONDS);
+            }
             System.out.println("Creating and starting container...");
             CreateContainerResponse container = dockerClient.createContainerCmd(imageName)
                     //.withHostConfig(HostConfig.newHostConfig())

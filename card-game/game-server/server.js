@@ -4,17 +4,19 @@ const http = require("http");
 const cors = require("cors");
 const serverSocketIO = require("socket.io");
 const fetch = require("node-fetch");
+const cfgProvider = require("./config");
 
 
+const cfg = cfgProvider.getCfg(process.env.GAME_ENV);
 const app = express();
 const server = http.createServer(app);
 const gameSocket = serverSocketIO(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: cfg.frontendUrl,
     methods: ["GET", "POST"],
   },
 });
-const port = 5000;
+const port = cfg.port;
 
 
 var fs = require('fs');
@@ -39,7 +41,7 @@ function getRandomPlayer() {
 }
 
 
-const roomSrvUrl = process.env.WEBSOCKET_URL ? process.env.WEBSOCKET_URL : "http://localhost:3000";
+var roomSrvUrl = cfg.roomSrvUrl;
 fetch(`${roomSrvUrl}/game-room-service/api/v1/room/users`,
   {
       method: 'POST',
@@ -52,10 +54,9 @@ fetch(`${roomSrvUrl}/game-room-service/api/v1/room/users`,
               'application/json; charset=UTF-8',
       },
   })
-  // Parse JSON data
   .then((response) => response.json())
-  // Showing response
   .then((json) => {
+    console.log("Players in room:");
     console.log(json)
     if (json && Array.isArray(json)) {
       gameState.players = json.map((value) => value.username);
@@ -64,9 +65,35 @@ fetch(`${roomSrvUrl}/game-room-service/api/v1/room/users`,
     }
   })
   .catch(err => {
+    console.log("Fetch room players failed");
     console.log("Room srv is unreachable");
     console.log(err);
   });
+function sendGameStatus() {
+  console.log(`Sending game status [${gameState.status}]`);
+  fetch(`${roomSrvUrl}/game-room-service/api/v1/game/status`,
+    {
+        method: 'POST',
+        body: JSON.stringify({
+          gameId: roomNumber,
+          status: gameState.status
+        }),
+        headers: {
+            'Content-type':
+                'application/json; charset=UTF-8',
+        },
+    })
+    .then((response) => {
+      if (response.ok) {
+        console.log("Game status sended successfully");
+      }
+    })
+    .catch(err => {
+      console.log("Send game status failed");
+      console.log("Room srv is unreachable");
+      console.log(err);
+    });
+}
 
 
 gameSocket.on("connection", (socket) => {
@@ -79,6 +106,7 @@ gameSocket.on("connection", (socket) => {
       gameState.status = "started"
       gameState.activePlayer = getRandomPlayer();
       gameState.question = getQuestion();
+      sendGameStatus();
     }
     var response = {
       id: socket.id,
@@ -101,6 +129,7 @@ gameSocket.on("connection", (socket) => {
     gameState.idArray = gameState.idArray.filter(e => e !== socket.id)
     if (gameState.idArray.length < 2) {
       gameState.status = "ended"
+      sendGameStatus();
     }
     if (gameState.activePlayer == socket.id) {
       gameState.activePlayer = getRandomPlayer();
@@ -113,5 +142,5 @@ gameSocket.on("connection", (socket) => {
 
 app.use(cors());
 server.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server listening port:${port}`);
 });

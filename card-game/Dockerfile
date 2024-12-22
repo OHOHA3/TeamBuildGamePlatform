@@ -4,6 +4,8 @@ FROM node:alpine
 # Setting up the work directory
 WORKDIR /app
 
+ENV GAME_ENV="production"
+
 # Setting up backend
 RUN mkdir backend
 COPY ./game-server/package.json ./backend/

@@ -10,7 +10,7 @@ import { OutlinedButton } from './components/OutlinedButton';
 import AvatarBox from './components/AvatarBox';
 import { QuestionBox } from './components/QuestionBox';
 
-const socket = io("http://localhost:5000");
+const socket = io(process.env.GAME_ENV === "production" ? "http://194.226.49.153:5000" : "http://localhost:5000");
 
 function App() {
   const [id, setId] = useState("");

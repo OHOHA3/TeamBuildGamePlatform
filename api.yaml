@@ -336,6 +336,22 @@ paths:
   # ================================
   #       Сервис игровых комнат
   # ================================
+  /game-room-service/api/v1/room/create:
+    get:
+      summary: создать комнату
+      description: создать комнату
+      tags:
+        - game-room-service
+      responses:
+        '200':
+          description: созданная комната
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreatedRoomDto'
+
   /game-room-service/api/v1/user/connect:
     post:
       parameters:
@@ -357,7 +373,13 @@ paths:
               $ref: '#/components/schemas/UserConnectRequest'
       responses:
         '200':
-          description: Юзер успешно зашел в комнату
+          description: Список всех доступных игр
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserConnectDto'
         '400':
           description: Юзер не найден
 
@@ -397,7 +419,7 @@ paths:
                   $ref: '#/components/schemas/GameDto'
 
   /game-room-service/api/v1/game/create:
-    get:
+    post:
       parameters:
         - name: Authorization
           in: header
@@ -409,13 +431,19 @@ paths:
       description: Создать игру
       tags:
         - game-room-service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGameRequestRoom'
       responses:
         '200':
           description: Список всех доступных игр
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreatedRoomDto'
+                $ref: '#/components/schemas/UserConnectDto'
 
   /game-room-service/api/v1/game/status:
     post:
@@ -495,6 +523,25 @@ components:
     # ================================
     # Схемы сервиса игровых комнат
     # ================================
+    CreateGameRequestRoom:
+      type: object
+      properties:
+        id:
+          type: integer
+        roomId:
+          type: integer
+      required:
+        - id
+        - roomId
+
+    UserConnectDto:
+      type: object
+      properties:
+        url:
+          type: string
+      required:
+        - url
+
     UserConnectRequest:
       type: object
       properties:

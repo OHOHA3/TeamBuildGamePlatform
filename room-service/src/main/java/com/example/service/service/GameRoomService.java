@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +39,8 @@ public class GameRoomService {
     @Value("${app.user-service.host}")
     private String userServiceUrl;
 
+    private String gameUrl = "http://194.226.49.153:3000";
+
     public List<GameDto> getAllAvailableGames() {
         /*return List.of(new GameDto(1L, "game1", "v1", "description1"),
                 new GameDto(2L, "game2", "v2", "description2"));*/
@@ -47,21 +50,24 @@ public class GameRoomService {
         return response.getBody();
     }
 
-    public CreatedRoomDto createGame(String token) {
-        var createdRoom = gameRoomRepo.save(new GameRoom());
+    public UserConnectDto createGame(CreateGameRequest createGameRequest, String token) throws BadRequestException {
+        var room = gameRoomRepo.findById(createGameRequest.roomId()).orElseThrow(() -> new BadRequestException("room not found"));
+        var user = userRepo.findById(getUserByToken(token).id()).orElseThrow(() -> new BadRequestException("user not found"));
+        user.setGameRoomId(room.getId());
 
-//привязка
         restTemplate
-                .postForEntity("http://" + gamePluginServiceUrl + ":8888/game-plugins-service/api/v1/games/create", new CreateGamesDto(createdRoom.getId(), "ws://localhost:8080/ws"),  String.class);
-        return new CreatedRoomDto(createdRoom.getId());
-        /*return new CreatedRoomDto(1L);*/
+                .postForEntity("http://" + gamePluginServiceUrl + ":8888/game-plugins-service/api/v1/games/create", new CreateGameDto(createGameRequest.id()),  String.class);
+
+        return new UserConnectDto(gameUrl);
     }
 
-    public void userConnect(String token, UserConnectRequest userConnectRequest) throws BadRequestException {
+    public UserConnectDto userConnect(String token, UserConnectRequest userConnectRequest) throws BadRequestException {
         var userDto = getUserByToken(token);
         var user = userRepo.findById(userDto.id()).orElseThrow(() -> new BadRequestException("unknown user id"));
         user.setGameRoomId(userConnectRequest.roomId());
         userRepo.save(user);
+
+        return new UserConnectDto(gameUrl);
     }
 
     public void userDisconnect(String token) throws BadRequestException {
@@ -93,7 +99,7 @@ public class GameRoomService {
 
     private UserDto getUserByToken(String token) {
         /*ResponseEntity<UserDto> response = restTemplate
-                .getForEntity("http://" + authServiceUrl + ":8080/auth-service/api/v1/validate",  UserDto.class);*/
+                .getForEntity("http://" + authServiceUrl + ":3222w3w/auth-service/api/v1/validate",  UserDto.class);*/
 
         HttpHeaders headers = new HttpHeaders();
 
@@ -104,5 +110,11 @@ public class GameRoomService {
         ResponseEntity<UserDto> response =
                 restTemplate.exchange("http://" + authServiceUrl + ":8888/auth-service/api/v1/validate", HttpMethod.GET, entity, UserDto.class);
         return response.getBody();
+    }
+
+    public CreatedRoomDto createRoom() {
+        var createdRoom = gameRoomRepo.save(new GameRoom(ThreadLocalRandom.current().nextLong()));
+
+        return new CreatedRoomDto(createdRoom.getId());
     }
 }

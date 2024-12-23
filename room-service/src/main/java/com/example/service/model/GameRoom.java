@@ -15,8 +15,8 @@ public class GameRoom implements Serializable {
     private Long id;
     private Long gameId;
 
-    public GameRoom(Long gameId) {
-        this.gameId = gameId;
+    public GameRoom(Long id) {
+        this.id = id;
     }
 
     @Override

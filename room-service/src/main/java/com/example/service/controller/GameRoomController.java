@@ -20,21 +20,26 @@ import java.util.Objects;
 public class GameRoomController {
     private final GameRoomService gameRoomService;
 
+    @GetMapping("/room/create")
+    public CreatedRoomDto createRoom() {
+        return gameRoomService.createRoom();
+    }
+
     @GetMapping("/game/get-all")
     public List<GameDto> getAllAvailableGames() {
         return gameRoomService.getAllAvailableGames();
     }
 
-    @GetMapping("/game/create")
-    public CreatedRoomDto createGame(HttpServletRequest request) {
+    @PostMapping("/game/create")
+    public UserConnectDto createGame(@RequestBody CreateGameRequest createGameRequest, HttpServletRequest request) throws BadRequestException {
         String token = request.getHeader("Authorization");
-        return gameRoomService.createGame(token);
+        return gameRoomService.createGame(createGameRequest, token);
     }
 
     @PostMapping("/user/connect")
-    public void userConnect(@RequestBody UserConnectRequest userConnectRequest, HttpServletRequest request) throws BadRequestException {
+    public UserConnectDto userConnect(@RequestBody UserConnectRequest userConnectRequest, HttpServletRequest request) throws BadRequestException {
         String token = request.getHeader("Authorization");
-        gameRoomService.userConnect(token, userConnectRequest);
+        return gameRoomService.userConnect(token, userConnectRequest);
     }
 
     @PostMapping("/user/disconnect")

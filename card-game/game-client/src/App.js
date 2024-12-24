@@ -3,12 +3,12 @@ import './App.css';
 import React, { useState, useEffect } from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
 import { Stack } from "@mui/material";
 import { io } from "socket.io-client";
 import { OutlinedButton } from './components/OutlinedButton';
 import AvatarBox from './components/AvatarBox';
 import { QuestionBox } from './components/QuestionBox';
+import QuestionButton from './components/QuestionButton';
 
 const socket = io(process.env.GAME_ENV === "production" ? "http://194.226.49.153:5000" : "http://localhost:5000");
 
@@ -61,11 +61,16 @@ function App() {
     };
   }, []); 
 
-  function onClick(index) {
-    var player = gameState.idArray[index]
-    console.log(`Choose player [${player}]`)
-    socket.emit("chooseActivePlayer", player);
+  function onQuestionButtonClick() {
+    var nextPlayer = id;
+    while (nextPlayer === id) {
+      nextPlayer = gameState.idArray[gameState.idArray.length * Math.random() | 0]
+    }
+    console.log(`Choose player [${nextPlayer}]`)
+    socket.emit("chooseActivePlayer", nextPlayer);
   }
+
+  var isActivePlayer = (id === gameState.activePlayer);
 
   return (
     <div className="app-box">
@@ -111,21 +116,15 @@ function App() {
                 background: "linear-gradient(150deg, #0051e1, #0073dd)",
               }}
             />
-            <QuestionBox 
-              elevation={3} 
-              sx={{
-                position: 'absolute', 
-                zIndex: '3',
-                background: "linear-gradient(135deg, #0b65ff, #7ce1fe)",
-              }}
-            >
-              <p className="question-label">
-                {getQuestionLabelText()}
-              </p>
-            </QuestionBox>
-            </div>
+            <QuestionButton 
+              disabled={!isActivePlayer} 
+              text={getQuestionLabelText()}
+              onClick={onQuestionButtonClick}
+            />
+          </div>
           <div className="user-list-parent">
-            <List component={Stack} 
+            <List 
+              component={Stack} 
               direction="row" 
               sx={{ 
                 width: 'fit-content', 
@@ -137,10 +136,8 @@ function App() {
                 .filter((_, index) => { return index < gameState.idArray.length; })
                 .map((value, index) => {
                 return (
-                  <ListItem key={value} disablePadding >
-                    <ListItemButton onClick={() => onClick(index)}>
-                      <AvatarBox userName={value}/>
-                    </ListItemButton>
+                  <ListItem key={value} spacing={1} >
+                    <AvatarBox userName={value} n={index} active={isActivePlayer}/>
                   </ListItem>
                 );
               })}

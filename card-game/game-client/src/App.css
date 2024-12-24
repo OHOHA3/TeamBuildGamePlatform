@@ -80,10 +80,11 @@
 }
 
 .user-list-parent {
-  flex-grow: 2;
+  flex-grow: 1;
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 0;
 }
 
 .avatar-box {
@@ -91,6 +92,7 @@
   justify-content: center;
   flex-direction: column;
   align-items: center;
+  margin: 0;
 }
 
 .avatar-label {

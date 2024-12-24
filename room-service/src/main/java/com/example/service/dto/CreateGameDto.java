@@ -1,7 +1,7 @@
 package com.example.service.dto;
 
 public record CreateGameDto(
-        Long id,
+        Long gameId,
         Long roomId
 ) {
 }

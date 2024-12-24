@@ -52,8 +52,16 @@ public class GameRoomService {
 
     public UserConnectDto createGame(CreateGameRequest createGameRequest, String token) throws BadRequestException {
         var room = gameRoomRepo.findById(createGameRequest.roomId()).orElseThrow(() -> new BadRequestException("room not found"));
-        var user = userRepo.findById(getUserByToken(token).id()).orElseThrow(() -> new BadRequestException("user not found"));
-        user.setGameRoomId(room.getId());
+        var userDto = getUserByToken(token);
+        var userOptional = userRepo.findById(userDto.id());
+        if(userOptional.isEmpty()) {
+            var user = new User(userDto.id(), userDto.username(), room.getId());
+            userRepo.save(user);
+        } else {
+            var user = userOptional.get();
+            user.setGameRoomId(room.getId());
+            userRepo.save(user);
+        }
 
         restTemplate
                 .postForEntity("http://" + gamePluginServiceUrl + ":8888/game-plugins-service/api/v1/games/create", new CreateGameDto(createGameRequest.id()),  String.class);
@@ -62,19 +70,36 @@ public class GameRoomService {
     }
 
     public UserConnectDto userConnect(String token, UserConnectRequest userConnectRequest) throws BadRequestException {
-        var userDto = getUserByToken(token);
+        /*var userDto = getUserByToken(token);
         var user = userRepo.findById(userDto.id()).orElseThrow(() -> new BadRequestException("unknown user id"));
         user.setGameRoomId(userConnectRequest.roomId());
-        userRepo.save(user);
+        userRepo.save(user);*/
+
+        var userDto = getUserByToken(token);
+        var userOptional = userRepo.findById(userDto.id());
+        if(userOptional.isEmpty()) {
+            var user = new User(userDto.id(), userDto.username(), userConnectRequest.roomId());
+            userRepo.save(user);
+        } else {
+            var user = userOptional.get();
+            user.setGameRoomId(userConnectRequest.roomId());
+            userRepo.save(user);
+        }
 
         return new UserConnectDto(gameUrl);
     }
 
     public void userDisconnect(String token) throws BadRequestException {
         var userDto = getUserByToken(token);
-        var user = userRepo.findById(userDto.id()).orElseThrow(() -> new BadRequestException("unknown user id"));
-        user.setGameRoomId(null);
-        userRepo.save(user);
+        var userOptional = userRepo.findById(userDto.id());
+        if(userOptional.isEmpty()) {
+            var user = new User(userDto.id(), userDto.username(), null);
+            userRepo.save(user);
+        } else {
+            var user = userOptional.get();
+            user.setGameRoomId(null);
+            userRepo.save(user);
+        }
     }
 
     public List<UserDto> getUsers() {

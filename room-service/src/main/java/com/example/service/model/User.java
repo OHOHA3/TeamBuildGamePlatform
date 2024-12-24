@@ -7,7 +7,6 @@ import org.springframework.data.redis.core.RedisHash;
 import java.io.Serializable;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 @RedisHash(value = "User")
 public class User implements Serializable {
@@ -16,7 +15,8 @@ public class User implements Serializable {
     private String name;
     private Long gameRoomId;
 
-    public  User(String name, Long gameRoomId) {
+    public  User(String id, String name, Long gameRoomId) {
+        this.id = id;
         this.name = name;
         this.gameRoomId = gameRoomId;
     }

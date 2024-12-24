@@ -141,7 +141,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserDetailsResponse'
-        '401':
+        '403':
           description: Токен недействителен или истёк
 
 # ================================
@@ -644,8 +644,8 @@ components:
       properties:
         identifier:
           type: string
-          description: Логин или email пользователя
-          example: user@example.com
+          description: Логин пользователя
+          example: username
         password:
           type: string
           description: Пароль пользователя

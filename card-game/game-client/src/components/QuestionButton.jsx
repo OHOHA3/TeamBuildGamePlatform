@@ -23,6 +23,8 @@ function QuestionButton(props) {
       <QButton 
         component={Paper} 
         elevation={3} 
+        disabled={props.disabled}
+        onClick={props.onClick}
       >
         <p className="question-label">
           {props.text}

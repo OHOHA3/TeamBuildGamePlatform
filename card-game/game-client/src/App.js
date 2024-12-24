@@ -3,8 +3,7 @@ import './App.css';
 import React, { useState, useEffect } from 'react';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import { Stack, IconButton } from "@mui/material";
+import { Stack } from "@mui/material";
 import { io } from "socket.io-client";
 import { OutlinedButton } from './components/OutlinedButton';
 import AvatarBox from './components/AvatarBox';
@@ -14,12 +13,12 @@ import QuestionButton from './components/QuestionButton';
 const socket = io(process.env.GAME_ENV === "production" ? "http://194.226.49.153:5000" : "http://localhost:5000");
 
 function App() {
-  const [id, setId] = useState("1");
+  const [id, setId] = useState("");
   const [gameState, setGameState] = useState({
-    question: "abc",
-    activePlayer: "1",
-    players: ["roman", "ilya", "danil"],
-    idArray: ["1", "2", "3"],
+    question: "",
+    activePlayer: "",
+    players: [],
+    idArray: [],
     status: ""
   });
   const [roomNumber, setRoomNumber] = useState("");
@@ -62,10 +61,13 @@ function App() {
     };
   }, []); 
 
-  function onClick(index) {
-    var player = gameState.idArray[index]
-    console.log(`Choose player [${player}]`)
-    socket.emit("chooseActivePlayer", player);
+  function onQuestionButtonClick() {
+    var nextPlayer = id;
+    while (nextPlayer === id) {
+      nextPlayer = gameState.idArray[gameState.idArray.length * Math.random() | 0]
+    }
+    console.log(`Choose player [${nextPlayer}]`)
+    socket.emit("chooseActivePlayer", nextPlayer);
   }
 
   var isActivePlayer = (id === gameState.activePlayer);
@@ -114,7 +116,11 @@ function App() {
                 background: "linear-gradient(150deg, #0051e1, #0073dd)",
               }}
             />
-            <QuestionButton text={getQuestionLabelText()}/>
+            <QuestionButton 
+              disabled={!isActivePlayer} 
+              text={getQuestionLabelText()}
+              onClick={onQuestionButtonClick}
+            />
           </div>
           <div className="user-list-parent">
             <List 
@@ -130,10 +136,8 @@ function App() {
                 .filter((_, index) => { return index < gameState.idArray.length; })
                 .map((value, index) => {
                 return (
-                  <ListItem key={value} disablePadding >
-                    <ListItemButton onClick={() => onClick(index)} disabled={!isActivePlayer}>
-                      <AvatarBox userName={value} n={index} active={isActivePlayer}/>
-                    </ListItemButton>
+                  <ListItem key={value} spacing={1} >
+                    <AvatarBox userName={value} n={index} active={isActivePlayer}/>
                   </ListItem>
                 );
               })}

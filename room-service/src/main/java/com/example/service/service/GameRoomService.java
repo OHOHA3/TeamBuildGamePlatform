@@ -41,11 +41,13 @@ public class GameRoomService {
 
     private String gameUrl = "http://194.226.49.153:3000";
 
+    private int port = 8080;
+
     public List<GameDto> getAllAvailableGames() {
         /*return List.of(new GameDto(1L, "game1", "v1", "description1"),
                 new GameDto(2L, "game2", "v2", "description2"));*/
         ResponseEntity<List<GameDto>> response = restTemplate
-                .exchange("http://" + gamePluginServiceUrl + ":8888/game-plugins-service/api/v1/games", HttpMethod.GET, null,  new ParameterizedTypeReference<List<GameDto>>() {
+                .exchange("http://" + gamePluginServiceUrl + ":"+port+"/game-plugins-service/api/v1/games", HttpMethod.GET, null,  new ParameterizedTypeReference<List<GameDto>>() {
                 });
         return response.getBody();
     }
@@ -64,7 +66,7 @@ public class GameRoomService {
         }
 
         restTemplate
-                .postForEntity("http://" + gamePluginServiceUrl + ":8888/game-plugins-service/api/v1/games/create", new CreateGameDto(createGameRequest.id()),  String.class);
+                .postForEntity("http://" + gamePluginServiceUrl + ":"+port+"/game-plugins-service/api/v1/games/create", new CreateGameDto(createGameRequest.id()),  String.class);
 
         return new UserConnectDto(gameUrl);
     }
@@ -104,7 +106,7 @@ public class GameRoomService {
 
     public List<UserDto> getUsers() {
         ResponseEntity<List<UserDto>> response = restTemplate
-                .exchange("http://" + userServiceUrl + ":8888/user-service/api/v1/users", HttpMethod.GET, null,  new ParameterizedTypeReference<List<UserDto>>() {
+                .exchange("http://" + userServiceUrl + ":"+port+"/user-service/api/v1/users", HttpMethod.GET, null,  new ParameterizedTypeReference<List<UserDto>>() {
                 });
         return response.getBody();
     }
@@ -133,7 +135,7 @@ public class GameRoomService {
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         ResponseEntity<UserDto> response =
-                restTemplate.exchange("http://" + authServiceUrl + ":8888/auth-service/api/v1/validate", HttpMethod.GET, entity, UserDto.class);
+                restTemplate.exchange("http://" + authServiceUrl + ":"+port+"/auth-service/api/v1/validate", HttpMethod.GET, entity, UserDto.class);
         return response.getBody();
     }
 

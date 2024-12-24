@@ -511,11 +511,15 @@ components:
     CreateGameRequest:
       type: object
       properties:
-        id:
+        gameId:
           type: integer
           example: 1
+        roomId:
+          type: integer
+          example: 123456789
       required:
-        - id
+        - gameId
+        - roomId
     # ================================
     # Схемы сервиса игровых комнат
     # ================================

@@ -33,13 +33,13 @@ public class GameInfoService {
         return gameRepository.findAll().stream().map(GameMapper::mapToGameOutput).toList();
     }
 
-    public String createGameInstance(int id, String webSocketUrl) throws IllegalArgumentException {
-        if (webSocketUrl == null) {
+    public String createGameInstance(int id, long roomId) throws IllegalArgumentException {
+        if (roomId == 0) {
             throw new IllegalArgumentException("webSocketUrl is null");
         }
         String imageName = gameRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Game id " + id + " not found"))
                 .getDockerImageName();
-        return dockerContainerHandler.createContainer(imageName, webSocketUrl);
+        return dockerContainerHandler.createContainer(imageName, String.valueOf(roomId));
     }
 
     public void stopGameInstance(String containerId) throws NotFoundException {

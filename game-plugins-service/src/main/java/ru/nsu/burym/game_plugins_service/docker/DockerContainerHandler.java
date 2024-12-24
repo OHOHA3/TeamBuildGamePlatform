@@ -28,7 +28,7 @@ public class DockerContainerHandler {
         this.authConfig = authConfig;
     }
 
-    public String createContainer(String imageName, String webSocketUrl) {
+    public String createContainer(String imageName, String roomId) {
         try {
             boolean isPresent = false;
             List<Image> images = dockerClient.listImagesCmd().exec();
@@ -51,7 +51,7 @@ public class DockerContainerHandler {
                     //.withHostConfig(HostConfig.newHostConfig())
                     // hostPort:containerPort
                     .withPortSpecs("5000:5000", "3000:3000") //todo переделать на случайный порт хоста
-                    .withEnv("WEBSOCKET_URL", webSocketUrl)
+                    .withEnv("ROOM_ID", roomId)
                     .exec();
 
             dockerClient.startContainerCmd(container.getId()).exec();

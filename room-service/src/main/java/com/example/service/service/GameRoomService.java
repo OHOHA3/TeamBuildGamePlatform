@@ -81,6 +81,7 @@ public class GameRoomService {
         var userOptional = userRepo.findById(userDto.id());
         if(userOptional.isEmpty()) {
             var user = new User(userDto.id(), userDto.username(), userConnectRequest.roomId());
+            user.setGameRoomId(userConnectRequest.roomId());
             userRepo.save(user);
         } else {
             var user = userOptional.get();

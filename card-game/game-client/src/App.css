@@ -10,25 +10,22 @@
   left: 0; 
 }
 
-.app-header {
-  background-color: #5e91fc;
-  padding-left: 8em;
-  align-content: center;
-  flex-grow: 1;
-}
-
-.logo-box {
-  display: flex;
-  flex-direction: row;
-  margin: 0;
-}
-
 .logo {
-  font-weight: 700;
-  font-family: 'Roboto';
-  font-size: 3em;
-  text-align: left;
-  margin: 0;
+  width: 130px;
+  height: auto;
+}
+
+.app-header {
+  position: fixed;
+  background-color: rgba(95, 145, 252, 1);
+  height: 60px;
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  z-index: 1000;
+  padding-left: 100px;
 }
 
 .game-parent {
@@ -63,7 +60,7 @@
 }
 
 .question-parent {
-  flex-grow: 4;
+  flex-grow: 3;
   display: flex;
   align-items: stretch;
   justify-content: center;

@@ -95,7 +95,7 @@ public class GameRoomService {
         return new UserConnectDto(gameUrl);
     }
 
-    public void userDisconnect(String token) throws BadRequestException {
+    public void userDisconnect(String token) {
         var userDto = getUserByToken(token);
         var userOptional = userRepo.findById(userDto.id());
         if(userOptional.isEmpty()) {

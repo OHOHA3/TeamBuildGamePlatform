@@ -52,12 +52,13 @@ public class DockerContainerHandler {
             portBindings.bind(containerPort, Ports.Binding.bindPort(3000));
             portBindings.bind(containerPort2, Ports.Binding.bindPort(5000));
             HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(portBindings);
+            System.out.println("ROOM_ID: " + roomId);
 
             CreateContainerResponse container = dockerClient.createContainerCmd(imageName)
                     .withHostConfig(hostConfig)
                     .withExposedPorts(containerPort)
                    // .withPortSpecs("5000:5000", "3000:3000") //todo переделать на случайный порт хоста
-                    .withEnv("ROOM_ID", roomId)
+                    .withEnv("ROOM_ID=" + roomId)
                     .exec();
 
             dockerClient.startContainerCmd(container.getId()).exec();

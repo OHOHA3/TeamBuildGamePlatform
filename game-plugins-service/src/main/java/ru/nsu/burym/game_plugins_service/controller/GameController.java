@@ -30,6 +30,7 @@ public class GameController {
     @PostMapping("/create")
     public ResponseEntity<String> createGameInstance(@RequestBody CreateInfo createInfo) {
         try {
+            System.out.println("Request: roomId: " + createInfo.roomId());
             String containerId = gameInfoService.createGameInstance(createInfo.gameId(), createInfo.roomId());
             return ResponseEntity.ok(containerId);
         } catch (IllegalArgumentException e) {

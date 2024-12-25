@@ -2,6 +2,7 @@ package ru.nsu.teamsoul.authservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import ru.nsu.teamsoul.authservice.service.AuthenticationService;
 @RequestMapping("/auth-service/api/v1")
 @RequiredArgsConstructor
 @CrossOrigin
+@Slf4j
 public class AuthenticationController {
     private final AuthenticationService service;
 
@@ -29,6 +31,7 @@ public class AuthenticationController {
 
     @GetMapping("/validate")
     public ResponseEntity<ValidationResponse> validateToken(@RequestHeader("Authorization") String authHeader) {
+        log.info("Validating token with header: {}", authHeader);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }

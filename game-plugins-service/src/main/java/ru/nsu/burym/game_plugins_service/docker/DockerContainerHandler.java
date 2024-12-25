@@ -52,6 +52,7 @@ public class DockerContainerHandler {
             portBindings.bind(containerPort, Ports.Binding.bindPort(3000));
             portBindings.bind(containerPort2, Ports.Binding.bindPort(5000));
             HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(portBindings);
+            System.out.println("ROOM_ID: " + roomId);
 
             CreateContainerResponse container = dockerClient.createContainerCmd(imageName)
                     .withHostConfig(hostConfig)

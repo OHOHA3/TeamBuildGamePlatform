@@ -6,6 +6,8 @@ import com.example.service.service.GameRoomService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,19 +33,27 @@ public class GameRoomController {
     }
 
     @PostMapping("/game/create")
-    public UserConnectDto createGame(@RequestBody CreateGameRequest createGameRequest, HttpServletRequest request) throws BadRequestException {
+    public ResponseEntity createGame(@RequestBody CreateGameRequest createGameRequest, HttpServletRequest request) throws BadRequestException {
         String token = request.getHeader("Authorization");
-        return gameRoomService.createGame(createGameRequest, token);
+        try {
+            return new ResponseEntity<>(gameRoomService.createGame(createGameRequest, token), HttpStatus.OK);
+        } catch (BadRequestException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/user/connect")
-    public UserConnectDto userConnect(@RequestBody UserConnectRequest userConnectRequest, HttpServletRequest request) throws BadRequestException {
+    public  ResponseEntity userConnect(@RequestBody UserConnectRequest userConnectRequest, HttpServletRequest request) throws BadRequestException {
         String token = request.getHeader("Authorization");
-        return gameRoomService.userConnect(token, userConnectRequest);
+        try {
+            return new ResponseEntity<>(gameRoomService.userConnect(token, userConnectRequest), HttpStatus.OK);
+        } catch (BadRequestException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping("/user/disconnect")
-    public void userDisconnect(HttpServletRequest request) throws BadRequestException {
+    public void userDisconnect(HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         gameRoomService.userDisconnect(token);
     }

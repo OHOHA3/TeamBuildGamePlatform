@@ -79,6 +79,7 @@ public class GameRoomService {
         user.setGameRoomId(userConnectRequest.roomId());
         userRepo.save(user);*/
 
+        var room = gameRoomRepo.findById(userConnectRequest.roomId()).orElseThrow(() -> new BadRequestException("room not found"));
         var userDto = getUserByToken(token);
         var userOptional = userRepo.findById(userDto.id());
         if(userOptional.isEmpty()) {

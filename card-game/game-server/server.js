@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require("express");
 const http = require("http");
-const cors = require("cors");
 const serverSocketIO = require("socket.io");
 const fetch = require("node-fetch");
 const cfgProvider = require("./config");
@@ -140,7 +139,6 @@ gameSocket.on("connection", (socket) => {
 });
 
 
-app.use(cors());
 server.listen(port, () => {
   console.log(`Server listening port:${port}`);
 });

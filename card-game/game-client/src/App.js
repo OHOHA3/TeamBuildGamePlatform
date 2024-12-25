@@ -10,7 +10,8 @@ import AvatarBox from './components/AvatarBox';
 import { QuestionBox } from './components/QuestionBox';
 import QuestionButton from './components/QuestionButton';
 
-const socket = io(process.env.GAME_ENV === "production" ? "http://194.226.49.153:5000" : "http://localhost:5000");
+// "http://localhost:5000"
+const socket = io("http://194.226.49.153:5000");
 
 function App() {
   const [id, setId] = useState("");

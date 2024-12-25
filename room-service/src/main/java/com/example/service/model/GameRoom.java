@@ -14,6 +14,7 @@ public class GameRoom implements Serializable {
     @Id
     private Long id;
     private Long gameId;
+    private String cont;
 
     public GameRoom(Long id) {
         this.id = id;

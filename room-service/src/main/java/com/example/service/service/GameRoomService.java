@@ -66,9 +66,10 @@ public class GameRoomService {
             userRepo.save(user);
         }
 
-        restTemplate
-                .postForEntity("http://" + gamePluginServiceUrl + ":"+port+"/game-plugins-service/api/v1/games/create", new CreateGameDto(createGameRequest.id(), createGameRequest.roomId()),  String.class);
+        String container = restTemplate
+                .postForEntity("http://" + gamePluginServiceUrl + ":"+port+"/game-plugins-service/api/v1/games/create", new CreateGameDto(createGameRequest.id(), createGameRequest.roomId()),  String.class).getBody();
 
+        room.setCont(container);
         return new UserConnectDto(gameUrl);
     }
 
@@ -115,9 +116,12 @@ public class GameRoomService {
     }
 
     public void getGameStatus(GameStatusDto gameStatusDto) throws BadRequestException {
-        var game = gameRepo.findById(gameStatusDto.gameId()).orElseThrow(() -> new BadRequestException("unknown game id"));
-        game.setStatus(gameStatusDto.status());
-        gameRepo.save(game);
+        var room = gameRoomRepo.findById(gameStatusDto.gameId()).orElseThrow(() -> new BadRequestException("room not found"));
+
+        if(gameStatusDto.status().equals("ended")) {
+            var cont = room.getCont();
+            restTemplate.getForEntity("http://" + gamePluginServiceUrl + ":"+port+"/game-plugins-service/api/v1/games/stop/"+cont, String.class);
+        }
     }
 
     public List<User> getRoomUsers(Long roomId) {

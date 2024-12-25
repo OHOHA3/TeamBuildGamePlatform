@@ -131,6 +131,7 @@ public class GameRoomService {
         /*ResponseEntity<UserDto> response = restTemplate
                 .getForEntity("http://" + authServiceUrl + ":3222w3w/auth-service/api/v1/validate",  UserDto.class);*/
 
+        System.out.println("token: " + token);
         HttpHeaders headers = new HttpHeaders();
 
         headers.set("Authorization", token);

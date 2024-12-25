@@ -4,8 +4,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.exception.NotModifiedException;
-import com.github.dockerjava.api.model.AuthConfig;
-import com.github.dockerjava.api.model.Image;
+import com.github.dockerjava.api.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,10 +46,17 @@ public class DockerContainerHandler {
                         .awaitCompletion(60, TimeUnit.SECONDS);
             }
             System.out.println("Creating and starting container...");
+            ExposedPort containerPort = ExposedPort.tcp(3000); // Порт внутри контейнера
+            ExposedPort containerPort2 = ExposedPort.tcp(5000); // Порт внутри контейнера
+            Ports portBindings = new Ports();
+            portBindings.bind(containerPort, Ports.Binding.bindPort(3000));
+            portBindings.bind(containerPort2, Ports.Binding.bindPort(5000));
+            HostConfig hostConfig = HostConfig.newHostConfig().withPortBindings(portBindings);
+
             CreateContainerResponse container = dockerClient.createContainerCmd(imageName)
-                    //.withHostConfig(HostConfig.newHostConfig())
-                    // hostPort:containerPort
-                    .withPortSpecs("5000:5000", "3000:3000") //todo переделать на случайный порт хоста
+                    .withHostConfig(hostConfig)
+                    .withExposedPorts(containerPort)
+                   // .withPortSpecs("5000:5000", "3000:3000") //todo переделать на случайный порт хоста
                     .withEnv("ROOM_ID", roomId)
                     .exec();
 

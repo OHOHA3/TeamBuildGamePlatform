@@ -70,19 +70,12 @@ function App() {
     socket.emit("chooseActivePlayer", nextPlayer);
   }
 
-  var isActivePlayer = (id === gameState.activePlayer);
+  var isActivePlayer = (id && id === gameState.activePlayer);
 
   return (
     <div className="app-box">
       <header className="app-header">
-        <div className="logo-box">
-          <p className="logo" style={{color: "black"}}>
-            Team
-          </p>
-          <p className="logo" style={{color: "white"}}>
-            Soul
-          </p>
-        </div>
+        <img className="logo" src={"/logo.png"} alt={"logo"} />
       </header>
       <div className="game-parent">
         <div className="game-box">

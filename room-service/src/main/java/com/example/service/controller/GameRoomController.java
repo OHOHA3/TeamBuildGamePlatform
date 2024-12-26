@@ -66,6 +66,9 @@ public class GameRoomController {
     @PostMapping("/room/users")
     public List<UserDto> getRoomUsers(@RequestBody RoomUsersRequest roomUsersRequest) {
         List<UserDto> users = gameRoomService.getUsers();
+        for (var user : users) {
+            System.out.println(user.username() + " " + user.id() + " " + user.email());
+        }
         List<User> roomUsers = gameRoomService.getRoomUsers(roomUsersRequest.roomId());
 
         return roomUsers.stream().map(u -> users.stream().filter(apiU -> Objects.equals(apiU.id(), String.valueOf(u.getId()))).findAny().orElse(null)).toList();

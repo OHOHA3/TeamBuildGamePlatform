@@ -86,10 +86,12 @@ public class GameRoomService {
             var user = new User(userDto.id(), userDto.username(), userConnectRequest.roomId());
             user.setGameRoomId(userConnectRequest.roomId());
             userRepo.save(user);
+            System.out.println("save user " + user.getId());
         } else {
             var user = userOptional.get();
             user.setGameRoomId(userConnectRequest.roomId());
             userRepo.save(user);
+            System.out.println("save user " + user.getId());
         }
 
         return new UserConnectDto(gameUrl);

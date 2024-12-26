@@ -66,10 +66,14 @@ public class GameRoomController {
     @PostMapping("/room/users")
     public List<UserGetDto> getRoomUsers(@RequestBody RoomUsersRequest roomUsersRequest) {
         List<UserGetDto> users = gameRoomService.getUsers();
-        for (var user : users) {
+        /*for (var user : users) {
             System.out.println(user.login() + " " + user.id() + " " + user.email());
-        }
+        }*/
         List<User> roomUsers = gameRoomService.getRoomUsers(roomUsersRequest.roomId());
+
+        for (var user : roomUsers) {
+            System.out.println(user.getId());
+        }
 
         return roomUsers.stream().map(u -> users.stream().filter(apiU -> Objects.equals(apiU.id(), String.valueOf(u.getId()))).findAny().orElse(null)).toList();
 

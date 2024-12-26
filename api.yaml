@@ -584,14 +584,14 @@ components:
     GameStatusDto:
       type: object
       properties:
-        gameId:
+        roomId:
           type: integer
           example: 1
         status:
           type: string
           example: running
       required:
-        - gameId
+        - roomId
         - status
 
     UserDto:

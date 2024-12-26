@@ -117,8 +117,9 @@ public class GameRoomService {
     }
 
     public void getGameStatus(GameStatusDto gameStatusDto) throws BadRequestException {
-        var room = gameRoomRepo.findById(gameStatusDto.gameId()).orElseThrow(() -> new BadRequestException("room not found"));
+        var room = gameRoomRepo.findById(gameStatusDto.roomId()).orElseThrow(() -> new BadRequestException("room not found"));
 
+        System.out.println(gameStatusDto.status());
         if(gameStatusDto.status().equals("ended")) {
             var cont = room.getCont();
             restTemplate.getForEntity("http://" + gamePluginServiceUrl + ":"+port+"/game-plugins-service/api/v1/games/stop/"+cont, String.class);

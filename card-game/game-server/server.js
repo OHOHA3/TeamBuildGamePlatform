@@ -25,6 +25,7 @@ for(i in questions) {
   console.log(questions[i]);
 };
 const roomNumber = process.env.ROOM_ID ? process.env.ROOM_ID : 1;
+console.log(`Room id: ${roomNumber}`);
 var gameState = {
   question: "",
   activePlayer: "",
@@ -68,32 +69,27 @@ fetch(`${roomSrvUrl}/game-room-service/api/v1/room/users`,
     console.log("Room srv is unreachable");
     console.log(err);
   });
-function sendGameStatus() {
+async function sendGameStatus() {
   console.log(`Sending game status [${gameState.status}]`);
-  fetch(`${roomSrvUrl}/game-room-service/api/v1/game/status`,
-    {
-        method: 'POST',
-        body: JSON.stringify({
-          gameId: roomNumber,
-          status: gameState.status
-        }),
-        headers: {
-            'Content-type':
-                'application/json; charset=UTF-8',
-        },
-    })
-    .then((response) => {
-      if (response.ok) {
-        console.log("Game status sended successfully");
-      }
-    })
-    .catch(err => {
-      console.log("Send game status failed");
-      console.log("Room srv is unreachable");
-      console.log(err);
-    });
+  const response = await fetch(`${roomSrvUrl}/game-room-service/api/v1/game/status`, {
+    method: 'POST',
+    body: JSON.stringify({
+      roomId: roomNumber,
+      status: gameState.status
+    }),
+    headers: {
+        'Content-type':
+          'application/json; charset=UTF-8',
+    },
+  });
+  if (response.ok) {
+    console.log("Game status sended successfully");
+  } else {
+    console.log("Send game status failed");
+    console.log("Room srv is unreachable");
+    console.log(response.statusText);
+  }
 }
-
 
 gameSocket.on("connection", (socket) => {
   console.log(`A user connected [${socket.id}]`);

@@ -42,33 +42,34 @@ function getRandomPlayer() {
 
 
 var roomSrvUrl = cfg.roomSrvUrl;
-fetch(`${roomSrvUrl}/game-room-service/api/v1/room/users`,
-  {
-      method: 'POST',
-      body: JSON.stringify({
-        gameId: roomNumber,
-        roomId: roomNumber,
-      }),
-      headers: {
-          'Content-type':
-              'application/json; charset=UTF-8',
-      },
-  })
-  .then((response) => response.json())
-  .then((json) => {
+async function updateRoom() {
+  console.log(`Updating room`);
+  const response = await fetch(`${roomSrvUrl}/game-room-service/api/v1/room/users`, {
+    method: 'POST',
+    body: JSON.stringify({
+      gameId: roomNumber,
+      roomId: roomNumber,
+    }),
+    headers: {
+        'Content-type':
+            'application/json; charset=UTF-8',
+    },
+  });
+  if (response.ok) {
+    const json = await response.json();
     console.log("Players in room:");
-    console.log(json)
+    console.log(json);
     if (json && Array.isArray(json)) {
       gameState.players = json.map((value) => value.login);
     } else {
       console.log("Room srv response bad format");
     }
-  })
-  .catch(err => {
-    console.log("Fetch room players failed");
+  } else {
+    console.log("Send game status failed");
     console.log("Room srv is unreachable");
-    console.log(err);
-  });
+    console.log(response.statusText);
+  }
+}
 async function sendGameStatus() {
   console.log(`Sending game status [${gameState.status}]`);
   const response = await fetch(`${roomSrvUrl}/game-room-service/api/v1/game/status`, {
@@ -91,8 +92,11 @@ async function sendGameStatus() {
   }
 }
 
+updateRoom();
+
 gameSocket.on("connection", (socket) => {
   console.log(`A user connected [${socket.id}]`);
+  updateRoom();
 
   socket.on("join", () => {
     console.log(`Join request from ${socket.id}`);

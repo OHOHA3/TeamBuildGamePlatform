@@ -28,8 +28,12 @@
 }
 
 .game-parent {
-  flex: 12;
+  height: calc(100% - 60px);
+  width: 100%;
   display: flex;
+  position: absolute;
+  bottom: 0;
+  left: 0;
   justify-content: center;
 }
 

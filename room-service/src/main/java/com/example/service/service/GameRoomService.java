@@ -117,6 +117,7 @@ public class GameRoomService {
     }
 
     public void getGameStatus(GameStatusDto gameStatusDto) throws BadRequestException {
+        System.out.println(gameStatusDto.status() + " 11");
         var room = gameRoomRepo.findById(gameStatusDto.roomId()).orElseThrow(() -> new BadRequestException("room not found"));
 
         System.out.println(gameStatusDto.status());

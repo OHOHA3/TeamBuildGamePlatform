@@ -59,7 +59,7 @@ fetch(`${roomSrvUrl}/game-room-service/api/v1/room/users`,
     console.log("Players in room:");
     console.log(json)
     if (json && Array.isArray(json)) {
-      gameState.players = json.map((value) => value.username);
+      gameState.players = json.map((value) => value.login);
     } else {
       console.log("Room srv response bad format");
     }

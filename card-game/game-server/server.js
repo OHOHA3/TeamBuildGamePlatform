@@ -126,7 +126,7 @@ gameSocket.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log(`User ${socket.id} disconnected`);
     gameState.idArray = gameState.idArray.filter(e => e !== socket.id)
-    if (gameState.idArray.length < 2) {
+    if (gameState.idArray.length < 1) {
       gameState.status = "ended"
       sendGameStatus();
     }

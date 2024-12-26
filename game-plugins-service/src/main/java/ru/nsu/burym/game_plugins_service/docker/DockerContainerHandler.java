@@ -58,7 +58,7 @@ public class DockerContainerHandler {
                     .withHostConfig(hostConfig)
                     .withExposedPorts(containerPort)
                    // .withPortSpecs("5000:5000", "3000:3000") //todo переделать на случайный порт хоста
-                    .withEnv("ROOM_ID", roomId)
+                    .withEnv("ROOM_ID=" + roomId)
                     .exec();
 
             dockerClient.startContainerCmd(container.getId()).exec();

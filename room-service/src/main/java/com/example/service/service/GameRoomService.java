@@ -109,9 +109,9 @@ public class GameRoomService {
         }
     }
 
-    public List<UserDto> getUsers() {
-        ResponseEntity<List<UserDto>> response = restTemplate
-                .exchange("http://" + userServiceUrl + ":"+port+"/user-service/api/v1/users", HttpMethod.GET, null,  new ParameterizedTypeReference<List<UserDto>>() {
+    public List<UserGetDto> getUsers() {
+        ResponseEntity<List<UserGetDto>> response = restTemplate
+                .exchange("http://" + userServiceUrl + ":"+port+"/user-service/api/v1/users", HttpMethod.GET, null,  new ParameterizedTypeReference<List<UserGetDto>>() {
                 });
         return response.getBody();
     }

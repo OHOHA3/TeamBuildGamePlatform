@@ -64,10 +64,10 @@ public class GameRoomController {
     }
 
     @PostMapping("/room/users")
-    public List<UserDto> getRoomUsers(@RequestBody RoomUsersRequest roomUsersRequest) {
-        List<UserDto> users = gameRoomService.getUsers();
+    public List<UserGetDto> getRoomUsers(@RequestBody RoomUsersRequest roomUsersRequest) {
+        List<UserGetDto> users = gameRoomService.getUsers();
         for (var user : users) {
-            System.out.println(user.username() + " " + user.id() + " " + user.email());
+            System.out.println(user.login() + " " + user.id() + " " + user.email());
         }
         List<User> roomUsers = gameRoomService.getRoomUsers(roomUsersRequest.roomId());
 

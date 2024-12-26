@@ -473,13 +473,13 @@ paths:
               $ref: '#/components/schemas/RoomUsersRequest'
       responses:
         '200':
-          description: Список всех доступных игр
+          description: Получить игроков комнаты
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/UserDto'
+                  $ref: '#/components/schemas/UserGetDto'
 
 
 # ================================
@@ -594,36 +594,29 @@ components:
         - roomId
         - status
 
-    UserDto:
+    UserGetDto:
       type: object
       properties:
-        id:
-          type: string
-          example: 1
-        username:
-          type: string
-          example: john_doe
-        email:
-          type: string
-          format: email
-          example: john@example.com
-        team:
-          type: string
-          example: Team Alpha
-        role:
-          type: string
-          example: user
         created_at:
           type: string
-          example: "2024-12-10T03:59:28.442+0700"
+        email:
+          type: string
+        id:
+          type: integer
+        login:
+          type: string
+        role:
+          type: string
+        status:
+          type: string
         updated_at:
           type: string
-          example: "2024-12-10T04:00:00.000+0700"
       required:
         - id
-        - username
+        - login
         - email
         - role
+        - status
         - created_at
         - updated_at
 

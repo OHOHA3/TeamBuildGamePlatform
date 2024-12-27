@@ -69,6 +69,7 @@ public class GameRoomService {
         String container = restTemplate
                 .postForEntity("http://" + gamePluginServiceUrl + ":"+port+"/game-plugins-service/api/v1/games/create", new CreateGameDto(createGameRequest.id(), createGameRequest.roomId()),  String.class).getBody();
 
+        System.out.println("cont id get " + container);
         room.setCont(container);
         gameRoomRepo.save(room);
         return new UserConnectDto(gameUrl);

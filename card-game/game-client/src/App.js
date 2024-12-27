@@ -22,7 +22,7 @@ function App() {
     idArray: [],
     status: ""
   });
-  const [roomNumber, setRoomNumber] = useState("");
+  const [roomNumber, setRoomNumber] = useState("2021");
 
   function getQuestionLabelText() {
     switch (gameState.status) {
@@ -71,6 +71,10 @@ function App() {
     socket.emit("chooseActivePlayer", nextPlayer);
   }
 
+  function onExitButtonCLick() {
+    window.location.replace(`http://194.226.49.153:4000/select/${roomNumber}`);
+  }
+
   var isActivePlayer = (id && id === gameState.activePlayer);
 
   return (
@@ -81,7 +85,7 @@ function App() {
       <div className="game-parent">
         <div className="game-box">
           <div className="game-header">
-            <OutlinedButton variant="outlined">
+            <OutlinedButton variant="outlined" onClick={onExitButtonCLick}>
               Выйти из игры
             </OutlinedButton>
             <p className="room-number-label">

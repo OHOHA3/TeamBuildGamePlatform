@@ -70,6 +70,7 @@ public class GameRoomService {
                 .postForEntity("http://" + gamePluginServiceUrl + ":"+port+"/game-plugins-service/api/v1/games/create", new CreateGameDto(createGameRequest.id(), createGameRequest.roomId()),  String.class).getBody();
 
         room.setCont(container);
+        gameRoomRepo.save(room);
         return new UserConnectDto(gameUrl);
     }
 
@@ -125,6 +126,7 @@ public class GameRoomService {
         System.out.println(gameStatusDto.status());
         if(gameStatusDto.status().equals("ended")) {
             var cont = room.getCont();
+            System.out.println("cont id " + cont);
             restTemplate.getForEntity("http://" + gamePluginServiceUrl + ":"+port+"/game-plugins-service/api/v1/games/stop/"+cont, String.class);
         }
     }
@@ -153,7 +155,7 @@ public class GameRoomService {
     }
 
     public CreatedRoomDto createRoom() {
-        var id = ThreadLocalRandom.current().nextLong(0, 99999);
+        var id = ThreadLocalRandom.current().nextLong(0, 9999);
 //        System.out.println(id);
         var createdRoom = gameRoomRepo.save(new GameRoom(id));
 

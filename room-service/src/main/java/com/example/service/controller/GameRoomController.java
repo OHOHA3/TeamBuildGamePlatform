@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,7 +39,9 @@ public class GameRoomController {
         try {
             return new ResponseEntity<>(gameRoomService.createGame(createGameRequest, token), HttpStatus.OK);
         } catch (BadRequestException e) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, e.getMessage()
+            );
         }
     }
 
@@ -48,7 +51,9 @@ public class GameRoomController {
         try {
             return new ResponseEntity<>(gameRoomService.userConnect(token, userConnectRequest), HttpStatus.OK);
         } catch (BadRequestException e) {
-            return new ResponseEntity(HttpStatus.NOT_FOUND);
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, e.getMessage()
+            );
         }
     }
 

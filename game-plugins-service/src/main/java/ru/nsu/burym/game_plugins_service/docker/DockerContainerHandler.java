@@ -2,6 +2,7 @@ package ru.nsu.burym.game_plugins_service.docker;
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerResponse;
+import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.exception.NotModifiedException;
 import com.github.dockerjava.api.model.*;
@@ -77,7 +78,20 @@ public class DockerContainerHandler {
             dockerClient.stopContainerCmd(containerId).exec();
         } catch (NotModifiedException ignored) {}
         System.out.println("Container stopped successfully!");
+
+        while (true) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            InspectContainerResponse.ContainerState state = dockerClient.inspectContainerCmd(containerId).exec().getState();
+            if (!state.getRunning()) { // Контейнер не работает
+                break;
+            }
+        }
         dockerClient.removeContainerCmd(containerId).exec();
+        System.out.println("Container removed successfully!");
     }
 
     @Deprecated

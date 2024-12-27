@@ -33,22 +33,22 @@ public class GameRoomController {
     }
 
     @PostMapping("/game/create")
-    public ResponseEntity createGame(@RequestBody CreateGameRequest createGameRequest, HttpServletRequest request) throws BadRequestException {
+    public ResponseEntity createGame(@RequestBody CreateGameRequest createGameRequest, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         try {
             return new ResponseEntity<>(gameRoomService.createGame(createGameRequest, token), HttpStatus.OK);
         } catch (BadRequestException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping("/user/connect")
-    public  ResponseEntity userConnect(@RequestBody UserConnectRequest userConnectRequest, HttpServletRequest request) throws BadRequestException {
+    public  ResponseEntity userConnect(@RequestBody UserConnectRequest userConnectRequest, HttpServletRequest request) {
         String token = request.getHeader("Authorization");
         try {
             return new ResponseEntity<>(gameRoomService.userConnect(token, userConnectRequest), HttpStatus.OK);
         } catch (BadRequestException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
     }
 

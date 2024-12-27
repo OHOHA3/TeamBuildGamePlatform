@@ -376,7 +376,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserConnectDto'
-        '400':
+        '404':
           description: Юзер не найден
 
   /game-room-service/api/v1/user/disconnect:
@@ -395,7 +395,7 @@ paths:
       responses:
         '200':
           description: Юзер успешно покинул комнату
-        '400':
+        '404':
           description: Юзер не найден
 
   /game-room-service/api/v1/game/get-all:
@@ -440,6 +440,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserConnectDto'
+        '404':
+          description: комната не найдена
 
   /game-room-service/api/v1/game/status:
     post:
